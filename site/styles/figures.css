@@ -48,3 +48,179 @@
   font-size: 1rem;
   line-height: 1.55;
 }
+
+/* Controls under or above a figure: native buttons and radio groups. */
+.figure__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* .button sets display, which would otherwise override the hidden attribute. */
+.figure__controls [hidden] {
+  display: none;
+}
+
+.figure__controls:first-child {
+  margin: 0 0 var(--space-4);
+}
+
+.figure__readout {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A floated legend sits on the same line as the options. */
+.choice-group legend {
+  float: left;
+  padding: 0;
+  color: var(--ink-muted);
+}
+
+.choice-group__options {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), background-color var(--duration) var(--ease);
+}
+
+.choice:hover {
+  border-color: var(--ink-muted);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--boa-ink);
+  background: var(--paper-sunk);
+}
+
+.choice input {
+  margin: 0;
+  accent-color: var(--boa-ink);
+}
+
+/* Diagram vocabulary shared by the token figures (colours from Method.svg). */
+.token {
+  stroke: var(--ink);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.token--context {
+  fill: var(--context);
+}
+
+.token--ghost {
+  fill: var(--context);
+  opacity: 0.3;
+}
+
+.token--soft {
+  fill: var(--kv);
+  stroke: var(--kv-stroke);
+}
+
+.token--answer {
+  fill: var(--teacher);
+}
+
+.block {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.block--llm {
+  fill: var(--llm);
+}
+
+.block--mamba {
+  fill: var(--mamba);
+}
+
+/* Tabular figures would also space the hyphen in "Mamba-2"; only the clocks need them. */
+.diagram-label {
+  fill: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: normal;
+}
+
+.diagram-label--muted {
+  fill: var(--ink-muted);
+  font-weight: 400;
+}
+
+/* Race */
+.figure__stage svg.race,
+.figure__stage svg.ratio {
+  width: 100%;
+}
+
+/* The narrow layouts are drawn for phones; on wider screens they stop growing,
+   and their controls stay aligned with them. */
+.figure__stage:has(> svg.race--narrow),
+.figure__stage:has(> svg.ratio--narrow) {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.race__lane {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.race__lane--boa,
+.race__clock--boa,
+.race__factor {
+  fill: var(--boa-ink);
+}
+
+.race__clock {
+  fill: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.race__factor {
+  font-weight: 600;
+}
+
+.race__sweep {
+  fill: var(--paper);
+  fill-opacity: 0.65;
+}
+
+.race__arrow {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Ratio */
+.ratio__link {
+  stroke: var(--kv-stroke);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}

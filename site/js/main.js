@@ -1,8 +1,13 @@
 import { loadData } from "./lib/data.js";
 import { mountFigures } from "./lib/mount.js";
+import { mount as mountRace } from "./figures/race.js";
+import { mount as mountRatio } from "./figures/ratio.js";
 
 // Figure modules register here as {id, mount}, where id is the <figure> id in index.html.
-const FIGURE_MODULES = [];
+const FIGURE_MODULES = [
+  {id: "figure-race", mount: mountRace},
+  {id: "figure-ratio", mount: mountRatio},
+];
 
 const LOAD_FAILED = "The data for this figure could not be loaded. Try reloading the page.";
 const MOUNT_FAILED = "This figure could not be drawn.";
