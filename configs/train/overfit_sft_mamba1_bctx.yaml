@@ -1,0 +1,58 @@
+# Overfit smoke test — MRQA supervised finetuning (SFT ablation), Mamba1 + KV B-ctx.
+# Mamba1 twin of overfit_sft_mamba2_bctx.yaml: no teacher, CE on ground-truth answers.
+# Run (single GPU): CUDA_VISIBLE_DEVICES=<free> uv run torchrun --nproc_per_node=1 main.py --config configs/train/overfit_sft_mamba1_bctx.yaml
+
+model:
+  objective: "sft"
+  mamba_model_name: &ssm_name "state-spaces/mamba-370m-hf"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 32
+  loss_type: "kl"
+  compile_llm: false
+
+training:
+  num_epochs: 100
+  patience: 100
+  batch_size: 16
+  learning_rate: 1.0e-4
+  weight_decay: 0.0
+  scheduler_epochs: 100
+  warmup_steps: 20
+  log_interval: 1
+  save_interval: 20
+  gradient_accumulation_steps: 1
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-3
+  profile: False
+  profile_range: []
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: False
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: 128
+  max_seq_len: 256
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "./debug/checkpoints"
+  output_dir: "./debug/outputs"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "overfit_sft_mamba1_bctx_smoke"
+  tags: ["overfit", "mamba1", "sft", "wrapped", "bctx", "smoke", "no-teacher"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

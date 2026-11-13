@@ -1,0 +1,64 @@
+# MRQA supervised finetuning (SFT ablation), Mamba2 compressor — full run.
+# Ablation counterpart of mambaL2_pathB_kv_01comp_from_pretrain.yaml (on `main`): IDENTICAL student
+# geometry, warm-start and hyperparameters, but trained on the GROUND-TRUTH MRQA answers
+# with cross-entropy (no teacher, no KD). This isolates the effect of the supervision
+# signal (GT-CE vs KV distillation) with everything else held fixed.
+# start_from loads compressor + kv_projector (strict=False); the wrapped-KV student has no
+# trainable anchor/kv_trigger, so any extra pretrain keys are ignored. Fresh optimizer.
+model:
+  objective: "sft"
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 10
+  temperature: 2.0                      # ignored for the sft objective (no teacher pass)
+  max_new_tokens: 80                    # ignored for the sft objective
+  loss_type: "kl"                       # ignored for the sft objective (SFT uses lm_ce_loss)
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Warm-start from the KV LM-pretrained Mamba2 compressor (+ kv_projector). Same FullFT
+  # Qwen3-1.7B as the KD counterpart, so KV projector shapes match. Fresh optimizer/epoch.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "01Comp_QC_Mamba2L_SFT_fromPretrain"
+  tags: ["train", "full", "DDP", "prompt-ordering", "Mamba2_1.3B", "sft", "wrapped", "bctx", "fromPretrain", "qwen3FullFT", "no-teacher"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

@@ -1,0 +1,65 @@
+# ABLATION 8x — Objective arm: LM pretrain -> LM (SFT) finetune (Mamba-2, KV).
+# = Table 1 "LM pretrain -> LM finetune"  AND  Table 2 "w/o KD finetuning".
+# MRQA SUPERVISED finetune on GROUND-TRUTH answers with cross-entropy (no teacher, no KD).
+# IDENTICAL student geometry / warm-start / hyperparameters as the KD finetune of the method; only the
+# supervision signal changes (GT-CE vs KV distillation). Warm-started from the SAME LM
+# KV-pretrain (configs/pretrain/mn5/qwen3_1-7b/pretrain_mamba2_kv_qwen3_8x.yaml on `main`). Frozen LLM = FullFT Qwen3-1.7B.
+#
+# BRANCH: needs `objective: sft` (MRQASupervisedTrainer) -> ablation/sft-finetune only.
+model:
+  objective: "sft"
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 8
+  temperature: 2.0                      # ignored for the sft objective (no teacher pass)
+  max_new_tokens: 80                    # ignored for the sft objective
+  loss_type: "kl"                       # ignored for the sft objective (SFT uses lm_ce_loss)
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Warm-start from the stride-8 KV LM-pretrain of the full method.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ABL_8x_ft_SFT_Mamba2_kv_fromLMpretrain"
+  tags: ["ablation", "8xComp", "train", "sft", "kv", "pathB", "mamba2", "wrapped", "bctx", "fromPretrain", "qwen3FullFT", "DDP", "no-teacher", "wo-kd"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"
