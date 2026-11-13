@@ -1,0 +1,67 @@
+# configs/train/offline_mamba2.yaml — offline KD training (Mamba2 backend).
+# Mirrors the Mamba2 training configs on `main` (model/data/wandb, configs/train/mn5/qwen2-5_0-5b/mamba2_01Comp.yaml)
+# with local, non-SLURM paths; adds the `kd` block nested
+# under `training` (src/utils/config.py's flattener only preserves nested dicts one level
+# below an existing section — a top-level `kd:` section would itself get flattened away).
+#
+# Fill training.kd.dump_dir with the directory holding manifest_train.json +
+# train_shard_r*.pt produced by `python -m src.baselines.dump_logits` (top_k=50).
+# model.max_new_tokens MUST equal the dump's max_new_tokens.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  compression_ratio: 0.1              # stride = int(1/ratio) = 10 (~10x compression)
+  temperature: 2.0
+  max_new_tokens: 32
+  loss_type: "kl"                     # "kl" | "confidence_kl"
+  confidence_mode: "max_prob"         # "max_prob" | "neg_entropy" (used when loss_type = confidence_kl)
+  compile_llm: false
+  student_template: "bare"
+  compress_question: true
+
+training:
+  num_epochs: 1
+  patience: 10
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.0
+  scheduler_epochs: 1
+  warmup_steps: 20
+  log_interval: 10
+  save_interval: 1
+  gradient_accumulation_steps: 1
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: []
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: True
+  kd:
+    offline: true
+    dump_dir: "/path/to/boa-context-compression/dumps/qwen3_1_7b_fullft_top50"
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_offline_mamba2"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "offline_kd_mamba2_qwen3_1.7b_top50"
+  tags: ["mamba2", "offline-kd", "packed", "DDP"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "batchmean+seq_norm"

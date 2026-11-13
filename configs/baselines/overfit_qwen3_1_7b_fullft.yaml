@@ -1,0 +1,61 @@
+# Overfit / early-stopping DEMO for the Qwen3 FullFT baseline.
+# Tiny train set + high constant LR + no weight decay -> train loss collapses toward 0
+# in a few epochs while eval_loss bottoms early then climbs (memorization). With a small
+# patience the LoggingEarlyStoppingCallback then fires visibly. Isolated output paths so
+# it never touches the real run's checkpoints/logits.
+
+model:
+  llm_model_name: "Qwen/Qwen3-1.7B"
+  max_seq_len: 512
+
+data:
+  data_dir: "/path/to/data/MRQA"
+  dev_dir: "/path/to/data/MRQA/dev"
+  max_samples: 128             # tiny -> memorizable fast
+  use_context: true
+  seed: 42
+
+training:
+  output_dir: "/path/to/checkpoints/qwen3_1_7b_fullft_overfit"
+  num_train_epochs: 60        # high ceiling; early stopping should fire well before this
+  per_device_train_batch_size: 6
+  per_device_eval_batch_size: 6
+  gradient_accumulation_steps: 1   # 64/8 = 8 steps/epoch, fast loop
+  learning_rate: 5.0e-4       # high -> rapid memorization
+  weight_decay: 0.0           # no regularization -> overfit harder
+  warmup_steps: 0
+  lr_scheduler_type: "constant"    # keep LR high; cosine decay would slow overfitting
+  max_grad_norm: 1.0
+  logging_steps: 1            # tiny run -> watch loss every step
+  logging_first_step: true
+  disable_tqdm: true          # per-epoch bar via EpochProgressCallback
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 2
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  bf16: true
+  gradient_checkpointing: true
+  ddp_find_unused_parameters: false
+  report_to: "wandb"
+  resume_from: null
+  start_from: null
+  patience: 3                 # early stop after 3 epochs with no eval_loss improvement
+
+paths:
+  final_checkpoint_dir: "/path/to/checkpoints/qwen3_1_7b_fullft_overfit/final"
+
+# Offline dump (not the focus here; isolated path so the demo is self-contained).
+dump:
+  splits: ["dev"]
+  top_k: 50
+  max_new_tokens: 80
+  batch_size: 16
+  shard_size: 2048
+  output_dir: "/path/to/boa-context-compression/logits/qwen3_1_7b_fullft_overfit"
+
+wandb:
+  project: "boa"
+  name: "qwen3_1.7b_overfit_demo"
+  tags: ["overfit", "early-stopping", "demo", "qwen3"]

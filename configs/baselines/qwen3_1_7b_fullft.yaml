@@ -1,0 +1,63 @@
+# Qwen3 FullFT baseline on MRQA (upper-bound teacher + offline KD logits source).
+
+model:
+  llm_model_name: "Qwen/Qwen3-1.7B"
+  max_seq_len: 1024
+
+data:
+  data_dir: "/path/to/data/MRQA"
+  dev_dir: "/path/to/data/MRQA/dev"
+  max_samples: null           # cap train (null = full)
+  max_eval_samples: 2000      # cap dev for fast/stable eval_loss (null = full dev set)
+  use_context: true
+  seed: 42
+
+# Passed straight to transformers.TrainingArguments (resume_from + patience popped out).
+training:
+  output_dir: "/path/to/checkpoints/qwen3_1_7b_fullft"
+  num_train_epochs: 20
+  per_device_train_batch_size: 16
+  per_device_eval_batch_size: 16
+  gradient_accumulation_steps: 4
+  learning_rate: 1.0e-5
+  weight_decay: 0.01
+  warmup_steps: 200
+  lr_scheduler_type: "cosine"
+  max_grad_norm: 1.0          # gradient clipping (logged to wandb as grad_norm)
+  logging_steps: 20
+  logging_first_step: true
+  disable_tqdm: true          # default whole-run bar off; EpochProgressCallback shows per-epoch
+  # Evaluate + checkpoint every eval_steps. save_steps must equal (or be a multiple of)
+  # eval_steps for load_best_model_at_end to find the best checkpoint.
+  eval_strategy: "steps"
+  eval_steps: 500
+  save_strategy: "steps"
+  save_steps: 500
+  save_total_limit: 3
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  greater_is_better: false
+  bf16: true
+  gradient_checkpointing: true
+  ddp_find_unused_parameters: false
+  report_to: "wandb"
+  resume_from: null           # null=fresh | "latest"=auto-find newest checkpoint-<step> in output_dir | <path>
+  start_from: null            # weights-only warm start from an HF dir (ignored if resuming)
+  patience: 4                 # EarlyStoppingCallback patience (eval windows of eval_steps); null/0 disables
+
+paths:
+  final_checkpoint_dir: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+
+# Offline top-k teacher-logit dump (free greedy generation, multi-GPU via torchrun).
+dump:
+  splits: ["train"]
+  top_k: 50
+  max_new_tokens: 80          # match online teacher (config_01CompDIST max_new_tokens)
+  batch_size: 16
+  shard_size: 2048
+  output_dir: "/path/to/boa-context-compression/logits/qwen3_1.7b_fullft"
+
+wandb:
+  project: "boa"
+  name: "qwen3_1.7b_fullft_baseline"
+  tags: ["baseline", "fullft", "qwen3"]
