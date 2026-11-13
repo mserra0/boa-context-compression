@@ -1,0 +1,62 @@
+# Full LM-pretraining (continuation CE, no KD) with KV-compression injection.
+# Decoder scaling: frozen decoder = Qwen3 4B FullFT (vs 1.7B FullFT).
+# Compressor = Mamba2 1.3B, packed [1,T]. Compression stride 4 (4x).
+#
+# Decoder-size suite: identical to the Qwen3-1.7B suite (learning_rate, warmup_steps, max_steps,
+# weight_decay, gradient_clip_max_norm, stride and the whole data: block) except for the model names;
+# only `stride` and the model names differ across this suite.
+#
+# Effective batch: tokens_per_batch(4096) x grad_accum(4) x world_size; 32 nodes x 4 GPUs = 128 ranks gives
+# 2,097,152 context tokens per optimizer step. Mamba2 packs to an exact token budget (no padding).
+#
+# Memory: the frozen decoder loads in the checkpoint dtype (bf16 with transformers 5.x, dtype="auto"; see
+# src/pretrain_model.py) and the compressor inherits it, so parameters, gradients and Adam moments are all
+# held in that dtype (about 8 bytes per trainable parameter). The KV projector adds 36 layers x 8 kv_heads x
+# 128 head_dim = 36864 output dims.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_4b_fullft/final"
+  compressor_type: "mamba2"
+  stride: 4
+  objective: "lm"
+  prompt_mode: "kv"
+
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+# Token-budget packing — Mamba2 only.
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 4096
+  max_seqs_per_batch: 32
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_kv_Mamba2-1.3B_Qwen3-4B-FullFT_10B_4xComp"
+  tags: ["pretrain", "lm", "KV-Prompt", "mamba2", "packed", "fineweb", "qwen3FullFT", "DDP", "4xComp", "qwen3-4b", "mamba2-1.3b", "decoder-scaling"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

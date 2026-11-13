@@ -1,0 +1,27 @@
+# Three-way sweep: our KV-path compressor vs Activation Beacon vs full context.
+#
+# 245760 sits just under a hard limit in our own method and is the largest point
+# where all three succeed; 262144 is included to record where each one stops.
+#
+# mamba2 ceiling: the fused in_proj row stride is d_in_proj=8512, and the
+# mamba_ssm Triton kernels index that tensor with int32, so a single packed
+# sequence overflows at 2**31 / 8512 = 252,288 tokens. This is a kernel indexing
+# limit, not a memory limit, so ssm_kv cannot run 262144.
+#
+# Beacon ceiling: its compressed stream must fit the backbone's 40960 position
+# budget. At ratio 8, 262144 tokens becomes 32768 beacon tokens + one 128-token
+# window, which fits. 512k would not, which is why this sweep stops at 256k.
+seq_lens: [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 245760, 262144]
+
+# ssm_kv runs last: its illegal memory access at 262144 poisons the CUDA context and
+# ends the process, so running it last keeps the other methods' rows. Rows stream to
+# disk as they complete.
+adapters: [beacon, full_ctx, ssm_kv]
+
+max_new_tokens: 64   # decode length, fixed across the sweep
+
+# Lower than the default sweep (2/5) to bound runtime: a single Beacon cell at 256k is
+# slow. All three methods share the settings; results are not directly comparable to
+# runs of the default config.
+warmup: 1
+repeats: 3

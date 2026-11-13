@@ -1,0 +1,51 @@
+# Full LM-pretraining (continuation CE, no KD) with KV-compression injection.
+# Mamba2 1.3B compressor, packed [1,T]; frozen decoder = Qwen3 1.7B FullFT; stride 10.
+# Mamba2 packs to an exact token budget (no padding): tokens_per_batch 4096 and gradient
+# accumulation 4, so one optimizer step covers 4096 x 4 x world_size context tokens.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  stride: 10
+  objective: "lm"
+  prompt_mode: "kv"
+
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+# Token-budget packing — Mamba2 only.
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 4096 
+  max_seqs_per_batch: 32
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_kv_Mamba2_1.3B_Qwen3-1.7B-FullFT_10B"
+  tags: ["pretrain", "lm", "KV-Prompt", "mamba2", "packed", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

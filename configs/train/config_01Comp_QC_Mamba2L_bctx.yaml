@@ -1,0 +1,66 @@
+# Long run mirroring the Mamba v2 (1.3B) QC baseline for the
+# template-wrapped student in Design B-ctx (question literal, only context compressed).
+# Same hyperparameters as that baseline; the B-ctx model items are loss_type, confidence_mode,
+# compile_llm, student_template and compress_question. Use it to compare B-ctx against the baseline.
+
+# Model configuration
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 80
+  # --- B-ctx settings ---
+  loss_type: "kl"              # "kl" | "confidence_kl"
+  confidence_mode: "max_prob"  # "max_prob" | "neg_entropy" (used when loss_type = confidence_kl)
+  compile_llm: false           # eager
+  student_template: "wrapped"  # "bare" (Design A) | "wrapped" (Design B)
+  compress_question: false     # wrapped only: true=B-qc (question compressed), false=B-ctx (question literal)
+
+# Training configuration
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 6
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 500
+  log_interval: 5
+  save_interval: 10
+  gradient_accumulation_steps: 3
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: True
+
+# Data configuration
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+# Paths
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+# WandB configuration
+wandb:
+  project: "boa"
+  entity: null
+  name: "01Comp_QC_Mamba2L_bctx"
+  tags: ["mamba2", "packed", "DDP", "prompt-ordering", "Mamba2_1.3B", "wrapped", "bctx"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "batchmean+seq_norm"

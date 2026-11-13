@@ -1,0 +1,67 @@
+# Path B KV-injection, Mamba2 compressor — full run.
+# MRQA fine-tune warm-started from the KV LM-pretrained compressor
+# (configs/pretrain/mn5/qwen3_1-7b/pretrain_mamba2_kv_qwen3.yaml).
+# The frozen LLM / KD teacher is the SAME FullFT Qwen3-1.7B used in that pretraining,
+# so the pretrained kv_projector (Qwen3 KV geometry) loads with matching shapes.
+# start_from loads compressor + kv_projector + kv_trigger (strict=False); anchor_embed
+# is not in the pretrain checkpoint (frozen-BOS-seed pretrain) so it re-inits and trains.
+# Same standardized training/data parameters as the Mamba1 counterpart so the two
+# backbones stay directly comparable; only the compressor (+ GPT-NeoX tokenizer) differs.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 80
+  loss_type: "kl"
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Warm-start from the KV LM-pretrained Mamba2 compressor (+ kv_projector + kv_trigger).
+  # Same FullFT Qwen3-1.7B teacher as the pretrain, so KV projector shapes match.
+  # Fresh optimizer/scheduler/epoch.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "01Comp_QC_Mamba2L_PathB_KV_fromPretrain"
+  tags: ["train", "full", "DDP", "prompt-ordering", "Mamba2_1.3B", "kv", "pathB", "wrapped", "bctx", "fromPretrain", "qwen3FullFT"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

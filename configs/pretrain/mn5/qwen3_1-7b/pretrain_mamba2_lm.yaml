@@ -1,0 +1,54 @@
+# LM-pretraining (continuation CE, no KD) — Mamba2 1.3B, packed [1,T]
+# Embedding-injection variant (prompt_mode: embed) of pretrain_mamba2_kv_qwen3.yaml —
+# same model/data/hyperparameters, soft prompts prepended as embeds instead of KV-injected.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  stride: 10
+  objective: "lm"
+  prompt_mode: "embed"
+
+# Training configuration (step-based)
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+# Dataloading (token-budget packing — Mamba2 only)
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 4096
+  max_seqs_per_batch: 32
+
+# Data configuration
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+# WandB configuration
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_embed_Mamba2_1.3B_Qwen3-1.7B-FullFT_10B"
+  tags: ["pretrain", "lm", "embed-prompt", "mamba2", "packed", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

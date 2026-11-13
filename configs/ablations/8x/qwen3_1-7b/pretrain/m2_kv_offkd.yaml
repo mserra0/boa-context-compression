@@ -1,0 +1,54 @@
+# ABLATION 8x — Objective arm: Off-policy KD PRETRAIN (Mamba-2, KV).
+# Pretraining objective flipped LM-CE -> KD: teacher is the frozen FullFT Qwen3-1.7B seeing
+# the plaintext prefix (off-policy), student is teacher-forced on the corpus continuation.
+# Mamba2 1.3B, packed [1,T]. Pairs with finetune/m2_kv_offkd_lm.yaml (-> SFT finetune).
+#
+# BRANCH: needs `pretrain_loss` support -> run on `ablation/kd-pretrain` (the only branch with the KD
+# pretrain objective).
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  stride: 8                 # ablation/kd-pretrain equivalent: compression_ratio: 0.125
+  objective: "lm"
+  prompt_mode: "kv"
+  pretrain_loss: "kd"       # off-policy KD pretraining (`ablation/kd-pretrain` branch only)
+
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 4096
+  max_seqs_per_batch: 32
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ABL_8x_pretrain_offKD_Mamba2_kv_Qwen3-1.7B"
+  tags: ["ablation", "8xComp", "pretrain", "kd", "off-policy", "KV-Prompt", "mamba2", "packed", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

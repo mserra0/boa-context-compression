@@ -1,0 +1,44 @@
+# MRQA F1/EM evaluation (official span-overlap metrics).
+# f1_em -> SpanMetricScorer: deterministic, offline, no server needed.
+scorer: f1_em
+
+datasets:
+  mrqa_data_dir: "/path/to/data/MRQA"   # contains dev/ and dev_ood/
+  max_samples: null                              # per dataset; null for full dev sets
+
+  # In-distribution dev sets (MRQA in-domain) -> dev/
+  in_domain:
+    squad: true
+    newsqa: true
+    triviaqa: true
+    hotpotqa: true
+    searchqa: true
+    naturalquestions: true
+
+  # Out-of-distribution dev sets (MRQA out-of-domain) -> dev_ood/
+  out_of_domain:
+    bioasq: true
+    drop: true
+    duorc: true
+    race: true
+    relationextraction: true
+    textbookqa: true
+
+# Which conditions to run/score. student = the compressor under evaluation;
+# teachers are optional frozen-LLM baselines (with / without context).
+conditions:
+  student: true
+  teacher_context: false
+  teacher_nocontext: false
+
+inference:
+  batch_size: 32
+
+force_recompute_baselines: false
+force_recompute_experiment: false
+
+wandb:
+  enabled: true
+  project: "boa-eval"
+  entity: null
+  tags: ["eval", "f1_em", "MRQA"]

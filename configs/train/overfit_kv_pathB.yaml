@@ -1,0 +1,61 @@
+# Overfitting smoke test for the KV-injection path with the template-wrapped student (Design B-ctx).
+# Layout (context-first KV ordering): [ctx-KV (injected) | tpl_prefix | question(literal) | sep | tpl_suffix | answer].
+# Only the context is compressed into the per-layer KV cache; the literal question lives in the
+# decode scaffold. Goal: confirm KV+wrapped/B-ctx trains and loss decreases on a tiny subset.
+# Run (single GPU): CUDA_VISIBLE_DEVICES=<free gpu> uv run torchrun --nproc_per_node=1 main.py --config configs/train/overfit_kv_pathB.yaml
+
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-370m-hf"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba"
+  prompt_mode: "kv"            # condition the frozen LLM via past_key_values
+  student_template: "wrapped"  # Design B: real chat template wraps the decode scaffold
+  compress_question: false     # B-ctx: only the context is compressed; question stays literal
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 32
+  loss_type: "kl"              # "kl" | "confidence_kl"
+  confidence_mode: "max_prob"  # "max_prob" | "neg_entropy" (used when loss_type = confidence_kl)
+  compile_llm: false           # KV + DynamicCache: per-step decode shapes graph-break compile
+
+training:
+  num_epochs: 100
+  patience: 100
+  batch_size: 16
+  learning_rate: 1.0e-4
+  weight_decay: 0.0
+  scheduler_epochs: 100
+  warmup_steps: 20
+  log_interval: 1
+  save_interval: 20
+  gradient_accumulation_steps: 1
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-3
+  profile: False
+  profile_range: []
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: False
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: 128
+  max_seq_len: 256
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "./debug/checkpoints"
+  output_dir: "./debug/outputs"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "overfit_kv_pathB_smoke"
+  tags: ["overfit", "mamba", "kv", "wrapped", "bctx", "smoke"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "batchmean+seq_norm"

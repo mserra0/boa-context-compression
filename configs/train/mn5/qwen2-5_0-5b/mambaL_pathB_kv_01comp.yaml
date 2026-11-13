@@ -1,0 +1,61 @@
+# Path B KV-injection, Mamba (v1) compressor — full run.
+# Standardized parameters of the Mamba 1.4B QC baseline
+# (Mamba 1.4B, 0.1 compression, QC ordering, plain KL). Only the conditioning is changed:
+# prompt_mode=kv + wrapped/B-ctx template (context-first ordering), so the frozen LLM is
+# conditioned via past_key_values instead of soft-prompt embeddings.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-1.4b-hf"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba"
+  prompt_mode: "kv"            # condition the frozen LLM via past_key_values
+  student_template: "wrapped"  # Path B: real chat template wraps the decode scaffold
+  compress_question: false     # B-ctx: only the context is compressed; question stays literal
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 80
+  loss_type: "kl"              # plain KL, no confidence weighting
+  compile_llm: false           # KV + DynamicCache: per-step decode shapes graph-break compile
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Optional warm start of the Mamba1 backbone (+ embed projector) from a compressor checkpoint;
+  # kv_projector and anchor_embed are re-initialised. Fresh optimizer/scheduler/epoch.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "01Comp_QC_MambaL_PathB_KV"
+  tags: ["train", "full", "DDP", "prompt-ordering", "Mamba1.4B", "kv", "pathB", "wrapped", "bctx"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

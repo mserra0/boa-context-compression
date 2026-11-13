@@ -1,0 +1,20 @@
+# Latency benchmark configuration.
+# Model checkpoint + train config are passed on the CLI (see bench.py), mirroring
+# src/inference.py. This file only holds the sweep parameters.
+
+# Peak memory grows linearly in L on top of the weight baseline. An OOM cell is recorded
+# as NaN and the sweep continues, so the point where full context stops fitting is
+# recorded too. full_ctx time-to-first-token is quadratic, so the longest cells are slow.
+# `ssm_kv` rows above 252,288 tokens exceed an int32 indexing limit in the mamba2 Triton
+# kernels (see docs/benchmarks/latency.md).
+seq_lens: [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288]
+
+# Methods to run, in order. Names must be keys in adapters.ADAPTERS.
+# Add `beacon` to compare against Activation Beacon (needs --beacon-checkpoint).
+# It is off by default because its window loop is serial: ttft is ~550 ms at 2k
+# and grows at least linearly, so the long tail of this sweep would take hours.
+adapters: [ssm, full_ctx]
+
+max_new_tokens: 64   # decode length, fixed across the sweep
+warmup: 2            # discarded runs per stage (kernel autotune / cache warmup)
+repeats: 5           # timed runs per stage; reported value is the median

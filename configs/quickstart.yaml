@@ -1,0 +1,47 @@
+# Quick Start configuration: small public models, a few hundred training samples.
+# Meant to verify the install and the data layout end to end, not to produce a useful compressor.
+# Run:  torchrun --standalone --nproc_per_node=1 main.py --config configs/quickstart.yaml
+
+model:
+  mamba_model_name: "state-spaces/mamba2-130m"   # compressor (Mamba2)
+  llm_model_name: "Qwen/Qwen2.5-0.5B-Instruct"   # frozen target LLM
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  stride: 4                # compression stride: 4 context tokens -> 1 compressed token
+  temperature: 2.0
+  max_new_tokens: 64
+  loss_type: "kl"
+
+training:
+  num_epochs: 2
+  patience: 2
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  warmup_steps: 5
+  log_interval: 5
+  save_interval: 1
+  gradient_accumulation_steps: 1
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-8
+  resume_from: null
+  start_from: null
+  distributed: True
+
+data:
+  dataset_name: "MRQA"
+  data_dir: "data/MRQA"    # must contain train/ and dev/ (see docs/data/datasets.md)
+  max_samples: 200         # random subset of the (very large) MRQA training split
+  max_seq_len: 512
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "checkpoints"
+  output_dir: "outputs"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "quickstart"
+  tags: ["quickstart"]

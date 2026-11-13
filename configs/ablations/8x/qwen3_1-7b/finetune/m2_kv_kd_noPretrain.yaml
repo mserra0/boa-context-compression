@@ -1,0 +1,60 @@
+# ABLATION 8x — Component arm: the method "w/o LM pretraining".
+# Mamba-2 + KV injection, KD finetune DIRECTLY from a randomly-initialized compressor
+# (NO warm-start). Everything else identical to the full method (KD finetune warm-started from the LM pretrain).
+# Isolates the contribution of the LM continuation pretraining stage.
+# Frozen LLM / KD teacher = FullFT Qwen3-1.7B (SAME teacher across every arm).
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 8
+  temperature: 2.0
+  max_new_tokens: 80
+  loss_type: "kl"
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 4
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  start_from: null              # w/o LM pretraining: train from random init (no warm-start)
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ABL_8x_ft_KD_Mamba2_kv_noPretrain"
+  tags: ["ablation", "8xComp", "train", "kd", "kv", "pathB", "mamba2", "wrapped", "bctx", "fromScratch", "qwen3FullFT", "DDP", "wo-lm-pretrain"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

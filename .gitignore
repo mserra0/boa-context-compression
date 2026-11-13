@@ -1,0 +1,66 @@
+# Python bytecode
+__pycache__/
+*.py[codz]
+*$py.class
+
+# C extensions (Mamba compiled ops)
+*.so
+
+# Packaging artifacts
+*.egg-info/
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv
+venv/
+env/
+
+# Environment / secrets
+.env
+.envrc
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Linters
+.ruff_cache/
+
+# IDE
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# W&B
+wandb/
+
+# Training outputs and checkpoints
+outputs/
+outputs_mn5/
+debug/checkpoints/
+debug/outputs/
+outputs_test/
+checkpoints/
+evals/
+# Anchored: an unanchored "data/" also matches docs/data/, which holds tracked docs.
+/data/
+
+# Editor swap/backup files
+*.swp
+*.swo
+*~
+
+tmp/
+# macOS
+.DS_Store

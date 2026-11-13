@@ -1,0 +1,61 @@
+# Path B KV-injection, Mamba2 compressor — full run.
+# Same standardized training/data parameters as mambaL_pathB_kv_01comp.yaml (from
+# the Mamba (v1) counterpart mambaL_pathB_kv_01comp.yaml) so the two backbones are directly
+# comparable; only the compressor is swapped to Mamba2 (+ its GPT-NeoX tokenizer).
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 80
+  loss_type: "kl"
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Optional warm start of the Mamba2 backbone (+ embed projector) from a compressor checkpoint;
+  # kv_projector and anchor_embed are re-initialised. Fresh optimizer/scheduler/epoch.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "01Comp_QC_Mamba2L_PathB_KV"
+  tags: ["train", "full", "DDP", "prompt-ordering", "Mamba2_1.3B", "kv", "pathB", "wrapped", "bctx"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

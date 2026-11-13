@@ -1,0 +1,34 @@
+# Five-way sweep: ours vs every context-compression baseline included here, all
+# at 8x compression, plus the uncompressed full-context reference.
+#
+# Ratios are set on the CLI (--sac-ratio 8, --icae-ratio 8, --beacon-ratio 8) and
+# ours comes from the checkpoint's own stride, so every method must be launched
+# at 8x for the comparison to mean anything. The `C` column in the summary table
+# is the check: it has to read seq_len / 8 on every row.
+#
+# Ordering is deliberate. Each method's model is loaded, swept and freed before
+# the next one starts (adapters are grouped by loader), so the order here is also
+# the order the models occupy the device:
+#   * icae first -- it is the one that dies earliest, and its encoder pays full
+#     quadratic attention over seq_len + n_mem in ONE pass. The reference never
+#     runs it past a 1024-token context; expect OOM well before the tail.
+#   * ssm_kv LAST -- a packed mamba2 sequence overflows int32 indexing in the
+#     Triton kernels at 252,288 tokens, and an illegal memory access poisons the
+#     CUDA context and kills the process. Rows stream to disk as they complete,
+#     but anything scheduled after that fault never runs.
+#
+# Lengths stop at 262144 for the same reason as config_beacon.yaml: at ratio 8
+# that is 32768 compressed tokens, which still fits Beacon's 40960 position
+# budget, and 512k would not.
+seq_lens: [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 245760, 262144]
+
+adapters: [icae, sac, beacon, full_ctx, ssm_kv]
+
+max_new_tokens: 64   # decode length, fixed across the sweep
+
+# Same reduced settings as config_beacon.yaml: the serial methods make a single
+# long cell expensive, and the median is already stable at 3 repeats. All methods
+# share the settings so the comparison stays internally consistent -- but these
+# numbers are not directly comparable to results produced with the default config.
+warmup: 1
+repeats: 3

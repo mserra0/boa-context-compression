@@ -1,0 +1,77 @@
+# Path B KV-injection, Mamba2 1.3B compressor — full run.
+# DECODER-SCALING ABLATION: frozen LLM / KD teacher = FullFT Qwen3-4B (vs Qwen3-1.7B).
+# Compression stride 4 (4x). MRQA fine-tune warm-started from the MATCHING
+# stride-4 KV LM-pretrained compressor:
+#   configs/pretrain/mn5/qwen3_4b/pretrain_mamba2-1.3b_kv_qwen3-4b_4x.yaml
+#
+# The pretrain and this finetune MUST share the same decoder. The KV projector's
+# out_dim is num_hidden_layers x num_kv_heads x head_dim: Qwen3-1.7B = 28x8x128 =
+# 28672, Qwen3-4B = 36x8x128 = 36864. Loading a Qwen3-1.7B-pretrained kv_projector
+# into a Qwen3-4B model raises a size-mismatch RuntimeError in load_state_dict
+# (strict=False does NOT suppress shape errors) — so a mismatch fails loudly, but
+# it does fail. Keep start_from pointing at a Qwen3-4B pretrain run.
+#
+# start_from loads compressor + kv_projector + kv_trigger (strict=False); anchor_embed
+# is not in the pretrain checkpoint (frozen-BOS-seed pretrain) so it re-inits and trains.
+#
+# Every training: knob is identical across the whole 4B suite and matches the
+# Qwen3-1.7B suite — only `stride` and the model names differ, so nothing but model
+# size and compression ratio can explain a result difference.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_4b_fullft/final"
+  compressor_type: "mamba2"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  prompt_mode: "kv"
+  student_template: "wrapped"
+  compress_question: false
+  stride: 4
+  temperature: 2.0
+  max_new_tokens: 80
+  loss_type: "kl"
+  compile_llm: false
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # Warm-start from the stride-4 KV LM-pretrained Mamba2 1.3B compressor
+  # (+ kv_projector + kv_trigger). Same FullFT Qwen3-4B teacher as that pretrain,
+  # so the kv_projector's 36864 out_dim matches. Fill in the run timestamp.
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "4xComp_QC_Mamba2-1.3B_Qwen3-4B_PathB_KV_fromPretrain"
+  tags: ["train", "full", "DDP", "prompt-ordering", "Mamba2_1.3B", "kv", "pathB", "wrapped", "bctx", "fromPretrain", "qwen3FullFT", "4xComp", "ablation", "qwen3-4b", "decoder-scaling"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

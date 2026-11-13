@@ -1,0 +1,56 @@
+# Overfitting smoke test for the Mamba (v1) path.
+# Goal: confirm the training loop runs and loss decreases on a tiny subset.
+# Run (single GPU): torchrun --nproc_per_node=1 main.py --config configs/train/overfit_mamba.yaml
+
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-370m-hf"
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba"
+  stride: 10
+  temperature: 2.0
+  max_new_tokens: 32
+  loss_type: "kl"              # "kl" | "confidence_kl"
+  confidence_mode: "max_prob"  # "max_prob" | "neg_entropy" (used when loss_type = confidence_kl)
+  compile_llm: true  
+  
+training:
+  num_epochs: 100
+  patience: 100
+  batch_size: 16
+  learning_rate: 1.0e-4
+  weight_decay: 0.0
+  scheduler_epochs: 100
+  warmup_steps: 20
+  log_interval: 1
+  save_interval: 20
+  gradient_accumulation_steps: 1
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-3
+  profile: False
+  profile_range: []
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: False
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: 128
+  max_seq_len: 256
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "./debug/checkpoints"
+  output_dir: "./debug/outputs"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "overfit_mamba_smoke"
+  tags: ["overfit", "mamba", "smoke"]
+  dataset: *dataset_name
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
+  kl_reduction: "batchmean+seq_norm"

@@ -1,0 +1,45 @@
+# Full LM-pretraining (continuation CE, no KD) with KV-compression injection.
+# Mamba1 1.4B compressor, left-padded [B,I]; frozen decoder = Qwen3 1.7B FullFT; stride 10.
+# Mamba1 cannot pack -> fixed batch_size (3) + left-pad (DistributedLengthGroupedSampler), so it
+# consumes fewer real context tokens per micro-batch than packed Mamba2.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-1.4b-hf"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba"
+  stride: 10
+  objective: "lm"
+  prompt_mode: "kv"
+
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 3
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_kv_Mamba1_1.4B_Qwen3-1.7B-FullFT_10B"
+  tags: ["pretrain", "lm", "KV-injection", "mamba1", "padded", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

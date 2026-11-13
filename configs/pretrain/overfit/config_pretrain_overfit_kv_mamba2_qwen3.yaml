@@ -1,0 +1,43 @@
+model:
+  mamba_model_name: "state-spaces/mamba2-1.3b"
+  # Fine-tuned Qwen3 1.7B FullFT baseline. Qwen3 attention applies a per-head k_norm
+  # (RMSNorm over head_dim) that Qwen2.5 lacks; build_kv_cache routes injected keys
+  # through it before RoPE so injected K matches the model's real keys.
+  llm_model_name: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  stride: 10
+  objective: "lm"
+  prompt_mode: "kv"
+training:
+  max_steps: 200
+  warmup_steps: 5
+  batch_size: 8
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  eval_interval: 200
+  save_interval: 1000
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+  overfit: true
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 8192
+  max_seqs_per_batch: 32
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/10BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 16
+  max_samples: 64
+  seed: 42
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "/path/to/outputs"
+wandb:
+  project: "boa"
+  entity: null
+  name: "lm-pretrain-overfit-kv-qwen3"
+  tags: ["pretrain", "mamba2", "kv", "fineweb", "qwen3"]

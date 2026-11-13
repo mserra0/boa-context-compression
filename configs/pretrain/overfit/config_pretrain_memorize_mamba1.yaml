@@ -1,0 +1,35 @@
+model:
+  mamba_model_name: "state-spaces/mamba-1.4b-hf"
+  llm_model_name: "Qwen/Qwen2.5-0.5B-Instruct"
+  compressor_type: "mamba"
+  stride: 10
+  objective: "lm"
+training:
+  max_steps: 5000
+  warmup_steps: 10
+  batch_size: 2
+  learning_rate: 0.0001
+  weight_decay: 0.0
+  eval_interval: 25
+  save_interval: 1000
+  log_interval: 10
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 1
+  overfit: true
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/10BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 8
+  max_samples: 40
+  seed: 42
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "/path/to/outputs"
+wandb:
+  project: "boa"
+  entity: null
+  name: "lm-pretrain-memorize-mamba1"
+  tags: ["pretrain", "mamba1", "fineweb", "memorize"]

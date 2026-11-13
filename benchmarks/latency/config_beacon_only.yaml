@@ -1,0 +1,13 @@
+# Beacon alone, over the standard 8x sweep range. Used to add a second Beacon
+# window to a figure whose other five curves already exist: re-running the
+# baselines would only re-measure what is already measured.
+#
+# Same warmup/repeats as config_sota.yaml, so rows produced here drop straight
+# into a figure built from that config without a settings mismatch.
+seq_lens: [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 245760, 262144]
+
+adapters: [beacon]
+
+max_new_tokens: 64
+warmup: 1
+repeats: 3
