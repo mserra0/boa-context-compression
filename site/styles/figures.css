@@ -1,0 +1,50 @@
+/* Figure frame shared by every figure module. */
+
+.figure {
+  width: 100%;
+  max-width: calc(var(--figure-max) + 2 * var(--gutter));
+  margin: var(--space-7) auto 0;
+  padding-inline: var(--gutter);
+}
+
+/* Figure labels, legends and controls use the sans face. */
+.figure__stage {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1.4;
+}
+
+.figure__stage svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.figure__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  padding: var(--space-6) var(--space-5);
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  text-align: center;
+}
+
+.figure.is-ready .figure__fallback {
+  display: none;
+}
+
+.figure figcaption {
+  max-width: var(--measure);
+  margin: var(--space-4) auto 0;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}

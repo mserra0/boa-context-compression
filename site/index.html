@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boa: Linear-Time Context Compression with State-Space Encoding</title>
+  <meta name="description" content="Boa compresses a long context into a short sequence of continuous representations with a Mamba-2 encoder, in one linear-time pass, for a frozen LLM to read in place of the text.">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#fdfdfb">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Linear-Time Context Compression with State-Space Encoding">
+  <meta property="og:description" content="A Mamba-2 encoder compresses a long context in one linear-time pass for a frozen LLM.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/source-serif-4-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/inter-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/figures.css">
+  <script src="vendor/gsap.min.js" defer></script>
+  <script src="vendor/ScrollTrigger.min.js" defer></script>
+  <script src="js/main.js" type="module"></script>
+</head>
+<body>
+  <main id="content">
+    <header class="masthead" id="top">
+      <div class="column">
+        <p class="mark">
+          <svg class="mark__glyph" viewBox="0 0 30 10" aria-hidden="true" focusable="false">
+            <rect x="0.5" y="0.5" width="8" height="9" rx="1.5"></rect>
+            <rect x="10.5" y="0.5" width="8" height="9" rx="1.5"></rect>
+            <rect x="20.5" y="0.5" width="8" height="9" rx="1.5"></rect>
+          </svg>
+          <span>Boa</span>
+        </p>
+        <h1 class="masthead__title">Linear-Time Context Compression with State-Space Encoding</h1>
+        <ul class="authors">
+          <li>Marc Serra Ortega</li>
+          <li>Andrey Barsky</li>
+          <li>Carlos Boned Riera</li>
+          <li>Tomás Ockier</li>
+          <li>Dimosthenis Karatzas</li>
+        </ul>
+        <p class="affiliation">Computer Vision Center, Universitat Autònoma de Barcelona</p>
+        <nav class="links" aria-label="Paper resources">
+          <a class="button" href="https://arxiv.org/abs/2610.33006">Paper</a>
+          <a class="button" href="https://github.com/mserra0/boa-context-compression">Code</a>
+          <a class="button" href="#citation">BibTeX</a>
+        </nav>
+        <p class="lede">Boa is a context compressor for a frozen language model. A <span class="nowrap">Mamba-2</span> encoder reads the context in one linear-time pass and keeps a short sequence of continuous representations, which the model reads in place of the text.</p>
+      </div>
+
+      <figure class="figure" id="figure-race">
+        <div class="figure__stage"></div>
+        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+        <figcaption>The same question, answered two ways by the same frozen LLM. Above, the LLM reads every context token. Below, Boa reads the context once and hands the LLM a much shorter input, so the answer can start sooner.</figcaption>
+      </figure>
+    </header>
+
+    <section class="section" id="concept" aria-labelledby="concept-title">
+      <div class="column">
+        <h2 id="concept-title">What context compression does</h2>
+        <p>A language model normally reads every token of its context, and that work grows with the length of the context. Context compression replaces the text with a shorter sequence of continuous vectors, often called soft tokens, which the unchanged model reads instead. Boa keeps one vector for every <var>r</var> tokens, counting back from the final token, so a context of <var>L</var> tokens becomes ⌈<var>L</var>&#8239;/&#8239;<var>r</var>⌉ soft tokens.</p>
+      </div>
+      <figure class="figure" id="figure-ratio">
+        <div class="figure__stage"></div>
+        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+        <figcaption>Change the compression ratio to see how many soft tokens remain. The final token is always kept, because in a causal model it has seen the whole context.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="cost" aria-labelledby="cost-title">
+      <div class="column">
+        <h2 id="cost-title">Time and memory</h2>
+        <p>Compression pays off for a single query only if producing the compressed context costs less than reading the full one. Boa’s encoder runs in linear time, so its own cost stays small as the context grows, whereas Transformer-based compressors first make a long pass of their own. Choose a context length to compare Boa with the same LLM reading the full context.</p>
+      </div>
+      <figure class="figure" id="figure-cost">
+        <div class="figure__stage"></div>
+        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+        <figcaption>End-to-end latency covers compression, prefill and generating the answer. Peak GPU memory was measured for the smaller decoder only.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="method" aria-labelledby="method-title">
+      <div class="column">
+        <h2 id="method-title">How Boa works</h2>
+        <p>Boa has two trained parts, a <span class="nowrap">Mamba-2</span> encoder and a projection, and one frozen part, the target LLM, which is never modified. Rather than entering at the input, the soft tokens are projected into keys and values in the LLM’s attention cache at every layer.</p>
+      </div>
+      <figure class="figure" id="figure-method">
+        <div class="figure__stage"></div>
+        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+        <figcaption>The encoder reads the context in one pass, every <var>r</var>-th hidden state is kept, and per-layer key and value projections turn those states into a KV cache for the frozen LLM. Training matches the next-token distribution of this student to that of the same LLM reading the full context.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section" id="results" aria-labelledby="results-title">
+      <div class="column">
+        <h2 id="results-title">Results</h2>
+        <p>On the in-domain MRQA question-answering datasets, Boa scores above Activation Beacon and SAC at every compression ratio tested, and loses little as the ratio grows. Out of domain the three methods are much closer, and which one leads depends on the ratio.</p>
+      </div>
+      <figure class="figure" id="figure-results">
+        <div class="figure__stage"></div>
+        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+        <figcaption>Scores are normalised between the LLM without any context and the same LLM reading the full context.</figcaption>
+      </figure>
+      <div class="column results-tables">
+        <h3>Average exact match and F1</h3>
+        <p class="table-note">Averages over the datasets in each split, with a frozen <span data-results-decoder>Qwen3</span> decoder. The best compressed score in each column is in bold.</p>
+        <noscript><p class="table-note">The table values are filled in by JavaScript. They are also in the results tables of the paper.</p></noscript>
+        <p class="table-note table-note--error" data-results-status hidden></p>
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-in-domain-caption">
+          <table class="data-table" id="table-in-domain">
+            <caption id="table-in-domain-caption">In domain</caption>
+          </table>
+        </div>
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-out-of-domain-caption">
+          <table class="data-table" id="table-out-of-domain">
+            <caption id="table-out-of-domain-caption">Out of domain</caption>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="limitations" aria-labelledby="limitations-title">
+      <div class="column">
+        <h2 id="limitations-title">Limitations</h2>
+        <dl class="limitations">
+          <dt>Verbatim span extraction is weaker.</dt>
+          <dd>Relation Extraction asks the model to copy exact spans of text. This is the setting in which attention-based Transformers exceed state-space models, and here Activation Beacon leads Boa at every compression ratio.</dd>
+          <dt>Long-context results are slightly below Activation Beacon.</dt>
+          <dd>On long-context benchmarks Boa is comparable to Activation Beacon on summarisation (BookSum, GovReport) but behind it on question answering (QASPER). We attribute the gap to a weaker long-context prior: the Mamba checkpoint we start from was pretrained only on short sequences, whereas Activation Beacon works directly on full-attention windows across the extended context.</dd>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section" id="citation" aria-labelledby="citation-title">
+      <div class="column">
+        <h2 id="citation-title">Citation</h2>
+        <div class="bibtex">
+          <div class="bibtex__bar">
+            <span class="bibtex__label">BibTeX</span>
+            <span class="bibtex__status" data-copy-status role="status"></span>
+            <button class="button button--small" type="button" data-copy-target="bibtex">Copy</button>
+          </div>
+<pre id="bibtex" tabindex="0"><code>@article{serraortega2026boa,
+  title   = {Linear-Time Context Compression with State-Space Encoding},
+  author  = {Serra Ortega, Marc and Barsky, Andrey
+             and Boned Riera, Carlos and Ockier, Tom{\'a}s
+             and Karatzas, Dimosthenis},
+  journal = {arXiv preprint arXiv:2610.33006},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.33006}
+}</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="column footer__inner">
+      <p>Computer Vision Center, Universitat Autònoma de Barcelona</p>
+      <p>Code released under the <a href="https://github.com/mserra0/boa-context-compression/blob/main/LICENSE">MIT License</a>. <a href="https://github.com/mserra0/boa-context-compression">Repository on GitHub</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

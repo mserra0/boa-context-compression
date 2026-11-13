@@ -1,0 +1,184 @@
+/* Page layout: one centred text column; figures may run wider. */
+
+.column {
+  width: 100%;
+  max-width: calc(var(--measure) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.column > * + * {
+  margin-top: var(--space-4);
+}
+
+/* Header */
+
+.masthead {
+  padding-top: var(--space-8);
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.mark__glyph {
+  width: 1.75rem;
+  height: auto;
+  fill: var(--kv);
+  stroke: var(--kv-stroke);
+  stroke-width: 1;
+}
+
+.masthead .column > .masthead__title {
+  margin-top: var(--space-5);
+}
+
+.authors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.masthead .column > .authors {
+  margin-top: var(--space-5);
+}
+
+.affiliation {
+  color: var(--ink-muted);
+}
+
+.masthead .column > .affiliation {
+  margin-top: var(--space-1);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.masthead .column > .links {
+  margin-top: var(--space-5);
+}
+
+.lede {
+  font-size: var(--step-1);
+  line-height: 1.5;
+}
+
+.masthead .column > .lede {
+  margin-top: var(--space-7);
+}
+
+/* Sections */
+
+main {
+  padding-bottom: var(--space-9);
+}
+
+.section {
+  padding-top: var(--space-9);
+}
+
+.section h2 + p {
+  margin-top: var(--space-4);
+}
+
+.results-tables {
+  margin-top: var(--space-7);
+}
+
+.results-tables h3 {
+  font-size: var(--step-1);
+}
+
+.table-note {
+  color: var(--ink-muted);
+  font-size: 1rem;
+}
+
+.table-note--error {
+  color: var(--ink);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Tables stay hidden until main.js has filled them; the noscript note stands in. */
+.table-scroll:not(:has(tbody)) {
+  display: none;
+}
+
+noscript {
+  display: block;
+}
+
+.column > .table-scroll {
+  margin-top: var(--space-6);
+}
+
+.limitations dt {
+  font-weight: 600;
+}
+
+.limitations dt:not(:first-child) {
+  margin-top: var(--space-5);
+}
+
+.limitations dd {
+  margin: var(--space-1) 0 0;
+}
+
+.section h2 + .limitations,
+.section h2 + .bibtex {
+  margin-top: var(--space-5);
+}
+
+.bibtex {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bibtex__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+}
+
+.bibtex__label {
+  font-weight: 500;
+}
+
+.bibtex__status {
+  margin-left: auto;
+  color: var(--ink-muted);
+}
+
+/* Footer */
+
+.footer {
+  border-top: 1px solid var(--rule);
+  padding-block: var(--space-6) var(--space-7);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.footer__inner > * + * {
+  margin-top: var(--space-2);
+}
