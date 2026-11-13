@@ -1,0 +1,70 @@
+
+# ICAE fine-tuning stage 2: KL-distillation against the teacher's own generated
+# answer — mirrors PromptDestiller's recipe exactly (same data, same loss type,
+# same teacher-generation procedure). Only the compressor architecture differs
+# from the Mamba baseline (ICAECompressor's LoRA + memory-slot encoder vs.
+# Mamba's causal soft-prompt projector), which isolates the effect of the architecture at a
+# fixed training objective.
+#
+# The ICAE paper fine-tunes against gold answers (see config_ICAE_ftgt.yaml); this config
+# applies Mamba's distillation objective to the ICAE compressor instead.
+#
+# Run AFTER config_ICAE_ae.yaml (AE pretraining) completes — set start_from
+# below to that run's best checkpoint.
+
+model:
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  encoder_model_name: *llm_name
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "distill"
+  loss_type: "kl"                     # "kl" | "confidence_kl" 
+  confidence_mode: "max_prob"
+  compression_ratio: 0.1
+  n_mem: 52
+  lora_r: 128
+  lora_alpha: 256     # convention suggests lora_alpha = 2 * lora_r
+  lora_dropout: 0.05
+  temperature: 2.0
+  max_new_tokens: 80
+
+training:
+  num_epochs: 10000
+  patience: 1
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 200
+  warmup_steps: 200
+  log_interval: 5
+  save_interval: 50
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 512
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_icae"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ICAE_ftdist_n52_Qwen05B"
+  tags: ["icae", "finetune", "kl-distill", "MRQA"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name

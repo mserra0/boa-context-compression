@@ -1,0 +1,70 @@
+
+# Model configuration
+# model:
+#   mamba_model_name: &ssm_name "state-spaces/mamba-1.4b-hf"
+#   llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+#   compressor_type: "mamba"
+#   compression_ratio: 0.1
+#   temperature: 2.0
+#   max_new_tokens: 80
+
+model:
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  encoder_model_name: *llm_name       # same arch as decoder, adapted with LoRA
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "ae"               # "ae" | "gt" | "distill" — see config_ICAE_ftgt.yaml / config_ICAE_ftdist.yaml
+  # loss_type: "kl" # only relevant for distillation objective (see config_ICAE_ftdist.yaml)
+  compression_ratio: 0.1             # informational — decoder uses n_mem, not this
+  n_mem: 52                          # ceil(512 * 0.1) ≈ 52 → matches Mamba 10x compression
+  lora_r: 128
+  lora_alpha: 32
+  lora_dropout: 0.05
+  temperature: 2.0                   # unused for reconstruction loss; kept for interface compat
+  max_new_tokens: 80
+
+# Training configuration
+training:
+  num_epochs: 10000
+  patience: 1
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 200
+  warmup_steps: 200
+  log_interval: 1
+  save_interval: 10
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 1.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: [3]
+  resume_from: null  # set to a path or "latest" to resume a run
+  start_from: null   # set to a path to warm-start weights without resuming optimizer
+  artifact_every_n_epochs: null
+  distributed: True
+
+# Data configuration
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: 5000
+  max_seq_len: 512
+  seed: 42
+  use_context: True
+
+# Paths
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_icae"
+
+# WandB configuration
+wandb:
+  project: "boa"
+  entity: null
+  name: "ICAE_ae_short_n52_Qwen05B"
+  tags: ["icae", "baseline", "reconstruction", "MRQA"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name
+  kl_reduction: "valid_mean_per_tok"

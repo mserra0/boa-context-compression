@@ -1,0 +1,73 @@
+
+# ICAE pretraining: continuation/LM objective (the half of the paper's pretraining
+# recipe that config_ICAE_ae.yaml's AE objective doesn't cover).
+#
+# Each MRQA passage is split into a leading span A (compressed into memory) and a
+# trailing span B — the text that naturally follows A in the same document. The
+# decoder predicts B from [memory(A) | B[:-1]] only, with zero direct access to A's
+# tokens, forcing memory to encode information usable for generation, not just
+# verbatim recall (which is all the AE objective tests).
+#
+# No question/answer framing is involved here — this reuses MRQA purely as a
+# source of plain document text, same as the paper's generic pretraining corpus.
+#
+# Independent of config_ICAE_ae.yaml (objective="ae") — these are two halves of
+# the same pretraining stage, not sequential. Run standalone, or combine the two
+# checkpoints' encoder weights downstream if you want a single pretrained init for
+# fine-tuning (not automated here).
+
+model:
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  encoder_model_name: *llm_name
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "lm"
+  continuation_split_range: [0.5, 0.9]  # per-sample uniform range for fraction of passage kept as A; remainder is B
+  compression_ratio: 0.1               # not used by ICAE - instead, should adjust n_mem to be 0.1 of max_seq_len
+  n_mem: 52                            # ceil(512 * 0.1) ≈ 52 → matches Mamba 10x compression
+  lora_r: 128                          # value from original ICAE paper
+  lora_alpha: 256                      # conventional heuristic suggests r*2
+  lora_dropout: 0.05
+  temperature: 2.0                     # unused for CE loss; kept for interface compat
+  max_new_tokens: 80
+
+training:
+  num_epochs: 10000
+  patience: 1
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 200
+  warmup_steps: 200
+  log_interval: 5
+  save_interval: 50
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 512
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_icae"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ICAE_lm_n52_Qwen05B"
+  tags: ["icae", "pretrain", "continuation", "MRQA"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name

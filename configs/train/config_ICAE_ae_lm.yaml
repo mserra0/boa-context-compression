@@ -1,0 +1,69 @@
+
+# ICAE pretraining: combined AE + LM objective, matching the ICAE paper's
+# actual recipe (arXiv:2307.06945 Appendix A):
+#
+#   L_pretrain = lambda * L_AE + (1 - lambda) * L_LM,  lambda = 0.5
+#
+# Both losses share a single compressor forward pass over span A (one set of
+# memory slots), but get two independent decoder passes per step: one
+# reconstructing A itself (AE), one predicting the withheld continuation B
+# that follows A in the same MRQA passage (LM). This supersedes running
+# config_ICAE_ae.yaml and config_ICAE_lm.yaml as separate standalone runs —
+# use this one for the single combined pretraining run described in the paper.
+
+model:
+  llm_model_name: &llm_name "Qwen/Qwen2.5-0.5B-Instruct"
+  encoder_model_name: *llm_name
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "ae_lm"
+  pretrain_ae_weight: 0.5              # lambda in L_pretrain = lambda*L_AE + (1-lambda)*L_LM (paper default)
+  continuation_split_range: [0.5, 0.9] # per-sample uniform range for fraction of passage kept as A; remainder is B
+  compression_ratio: 0.1               # not used by ICAE - instead, should adjust n_mem to be 0.1 of max_seq_len
+  n_mem: 52                            # ceil(512 * 0.1) ≈ 52 → matches Mamba 10x compression
+  lora_r: 128                          # value from original ICAE paper
+  lora_alpha: 256                      # conventional heuristic suggests r*2
+  lora_dropout: 0.05
+  temperature: 2.0                     # unused for CE loss; kept for interface compat
+  max_new_tokens: 80
+
+training:
+  num_epochs: 20
+  patience: 1
+  batch_size: 8
+  learning_rate: 3.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 20
+  warmup_steps: 200
+  log_interval: 5
+  save_interval: 50
+  gradient_accumulation_steps: 2
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-8
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  start_from: null
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 512
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_icae"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ICAE_ae+lm_lr3e-4_n52_Qwen05B"
+  tags: ["icae", "pretrain", "ae+lm", "MRQA"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name

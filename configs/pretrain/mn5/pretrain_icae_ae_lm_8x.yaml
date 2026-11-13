@@ -1,0 +1,70 @@
+# ICAE fineweb pretraining (cluster) — combined AE + LM objective (arXiv:2307.06945 Appendix A).
+# Cluster-path counterpart of ../config_ICAE_pretrain_ae+lm.yaml, mirroring how
+# pretrain_mamba2_lm.yaml on `main` points the Mamba fineweb recipe at cluster paths.
+#
+# Uses the step-based pretrain() driver (src/pretrain.py) — same driver Mamba's cluster
+# fineweb configs use, keyed off max_steps below instead of num_epochs. Checkpointing:
+# save_interval-triggered checkpoints + the SIGINT-triggered interrupted checkpoint
+# (fired by --signal=SIGINT@300 in mn5_train_icae.slurm) are both supported;
+# resume_from: latest restores global_step/optimizer/scheduler state (src/pretrain.py's
+# resume block), so a run can be continued across job submissions.
+model:
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  encoder_model_name: *llm_name
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "ae_lm"
+  pretrain_ae_weight: 0.5
+  continuation_split_range: [0.5, 0.9]
+  compression_ratio: 0.125
+  lora_r: 128
+  lora_alpha: 256
+  lora_dropout: 0.05
+  temperature: 2.0
+  max_new_tokens: 80
+
+training:
+  # num_epochs kept only to satisfy the config validator (REQUIRED_SECTIONS) — the
+  # step-based pretrain() driver ignores it; max_steps below is what actually governs
+  # run length, matching pretrain_mamba2_lm.yaml on `main`.
+  num_epochs: 1
+  max_steps: 10000
+  batch_size: 3
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  warmup_steps: 50
+  eval_interval: 200
+  save_interval: 200
+  log_interval: 50
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 1.0
+#  resume_from: "latest"               # resume after a SIGINT-checkpoint
+  resume_from: null
+  start_from: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "FineWeb-EDU"
+  dataset_format: "fineweb"
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  min_doc_tokens: 320
+  val_samples: 2000
+  max_samples: null
+  max_seq_len: 1024 # in ICAE this is used only for the validator and the QA inference
+  seed: 42
+  use_context: True
+  max_ctx: 1024
+  max_pred: 256
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_ICAE_8x_ae+lm_Qwen3-1.7B-FullFT_n52_100B"
+  tags: ["pretrain", "icae", "ae+lm", "fineweb", "qwen3FullFT", "DDP"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name

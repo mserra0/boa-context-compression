@@ -1,0 +1,65 @@
+# MRQA F1/EM evaluation (official span-overlap metrics).
+# Scorer options:
+#   f1_em     -> SpanMetricScorer (official MRQA F1/EM, no server needed)
+#   llm_judge -> LLMJudgeScorer   (alternative; requires a running vLLM judge)
+scorer: f1_em
+
+datasets:
+  mrqa_data_dir: "/path/to/data/MRQA"   # contains dev/ and dev_ood/
+  max_samples: null                              # per dataset; null for full dev sets
+
+  # In-distribution dev sets (MRQA in-domain) -> dev/
+  in_domain:
+    squad: true
+    newsqa: true
+    triviaqa: true
+    hotpotqa: true
+    searchqa: true
+    naturalquestions: true
+
+  # Out-of-distribution dev sets (MRQA out-of-domain) -> dev_ood/
+  out_of_domain:
+    bioasq: true
+    drop: true
+    duorc: true
+    race: true
+    relationextraction: true
+    textbookqa: true
+
+# Which conditions to run/score. student = the compressor under evaluation;
+# teachers are optional frozen-LLM baselines (with / without context).
+conditions:
+  student: true
+  teacher_context: true
+  teacher_nocontext: true
+
+inference:
+  batch_size: 32
+
+force_recompute_baselines: false
+force_recompute_experiment: true
+
+wandb:
+  enabled: true
+  project: "boa-eval"
+  entity: null
+  tags: ["eval", "f1_em", "MRQA"]
+
+# Only read when scorer: llm_judge (kept as the alternative evaluation path).
+judge:
+  model: "Qwen/Qwen3-32B"
+  base_url: "http://localhost:8080/v1"
+  max_concurrent: 32
+  max_tokens: 128
+  temperature: 1.0
+  prompt_template: |
+    You are evaluating a Question Answering system. Decide whether the Predicted Answer
+    correctly answers the Question by matching any of the Reference Answers.
+    Score 1 if the core answer matches a reference (ignore extra context, synonyms,
+    articles, punctuation). Score 0 if it names a different value or does not answer.
+
+    **Question:** {question}
+    **Reference Answer:** {references}
+    **Predicted Answer:** {prediction}
+
+    Respond ONLY with a JSON object: {{"Reason": "one sentence", "Score": 0 or 1}}

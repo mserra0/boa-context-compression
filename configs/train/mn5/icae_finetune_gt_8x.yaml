@@ -1,0 +1,66 @@
+# ICAE fine-tuning stage 2: gold-answer cross-entropy (full run).
+#
+# Reproduces the ICAE paper's fine-tuning recipe: decoder predicts the gold
+# MRQA answer from [memory(context+question) | answer[:-1]], trained with
+# plain CE against the human-written answer, the question-answering objective
+# that config_eval_icae.yaml evaluates (the 'lm'/'ae_lm' variants continue the
+# pretraining objective instead). See config_ICAE_ftgt.yaml for the small-scale
+# version of the same recipe.
+#
+# start_from points at the completed FineWeb ae_lm pretrain checkpoint, same
+# as the other two finetune configs — this is a from-pretrain finetune, not
+# chained after the lm/ae+lm MRQA-continuation configs.
+model:
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  encoder_model_name: *llm_name
+  mamba_model_name: null              # unused for ICAE; kept so config validator passes
+  compressor_type: "icae"
+  icae_objective: "gt"
+  compression_ratio: 0.125
+  lora_r: 128
+  lora_alpha: 256
+  lora_dropout: 0.05
+  temperature: 2.0
+  max_new_tokens: 80
+
+training:
+  num_epochs: 10000
+  patience: 6
+  batch_size: 4
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  scheduler_epochs: 100
+  warmup_steps: 400
+  log_interval: 100   # steps
+  save_interval: 1    # epochs
+  gradient_accumulation_steps: 4
+  gradient_clip_max_norm: 2.0
+  lr_scheduler_eta_min: 1.0e-6
+  profile: False
+  profile_range: [3]
+  resume_from: null
+  # pre-trained ICAE compressor (FineWeb ae_lm pretrain, not the MRQA-continuation runs)
+  start_from: "/path/to/checkpoints/<pretrain_run_dir>/best_model.pt"
+  artifact_every_n_epochs: null
+  distributed: True
+
+data:
+  dataset_name: &dataset_name "MRQA"
+  data_dir: "/path/to/data/MRQA"
+  max_samples: null
+  max_seq_len: 1024
+  seed: 42
+  use_context: True
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "ft_ICAE_gt_8x_Qwen3-1.7B-FullFT"
+  tags: ["train", "full", "DDP", "qwen3FullFT", "ICAE"]
+  dataset: *dataset_name
+  llm_model_name: *llm_name
+  encoder_model_name: *llm_name

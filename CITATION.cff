@@ -1,0 +1,58 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "Boa: Linear-Time Context Compression with State-Space Encoding"
+type: software
+license: MIT
+repository-code: "https://github.com/mserra0/boa-context-compression"
+authors:
+  - family-names: "Serra Ortega"
+    given-names: "Marc"
+  - family-names: "Barsky"
+    given-names: "Andrey"
+  - family-names: "Boned Riera"
+    given-names: "Carlos"
+  - family-names: "Ockier"
+    given-names: "Tomás"
+  - family-names: "Karatzas"
+    given-names: "Dimosthenis"
+preferred-citation:
+  type: article
+  title: "Linear-Time Context Compression with State-Space Encoding"
+  authors:
+    - family-names: "Serra Ortega"
+      given-names: "Marc"
+    - family-names: "Barsky"
+      given-names: "Andrey"
+    - family-names: "Boned Riera"
+      given-names: "Carlos"
+    - family-names: "Ockier"
+      given-names: "Tomás"
+    - family-names: "Karatzas"
+      given-names: "Dimosthenis"
+  year: 2026
+  journal: "arXiv preprint"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.33006"
+  url: "https://arxiv.org/abs/2610.33006"
+
+references:
+  - type: conference-paper
+    title: "In-context Autoencoder for Context Compression in a Large Language Model"
+    authors:
+      - family-names: "Ge"
+        given-names: "Tao"
+      - family-names: "Hu"
+        given-names: "Jing"
+      - family-names: "Wang"
+        given-names: "Lei"
+      - family-names: "Wang"
+        given-names: "Xun"
+      - family-names: "Chen"
+        given-names: "Si-Qing"
+      - family-names: "Wei"
+        given-names: "Furu"
+    conference:
+      name: "The Twelfth International Conference on Learning Representations (ICLR)"
+    year: 2024
+    url: "https://arxiv.org/abs/2307.06945"

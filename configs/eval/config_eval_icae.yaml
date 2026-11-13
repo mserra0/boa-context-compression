@@ -1,0 +1,58 @@
+judge:
+  model: "Qwen/Qwen3-32B"
+  base_url: "http://localhost:8080/v1"
+  max_concurrent: 32
+  max_tokens: 128
+  temperature: 1.0
+  prompt_template: |
+      You are evaluating a Question Answering system. Your sole task is to decide whether the Predicted Answer correctly answers the Question by matching the Reference Answer.
+
+      **Scoring rule — focus only on the core answer:**
+      Extract the specific piece of information the Question asks for (a name, date, place, number, etc.).
+      Score 1 if the Predicted Answer contains that specific piece of information and it matches the Reference Answer, even if the prediction also includes extra context, background, or additional sentences.
+      Score 0 only if the core answer is outright wrong or entirely absent.
+
+      **Score "1" (Correct) — award if ANY of these apply:**
+      - The prediction states or contains the exact entity/value the question asks for, matching the reference.
+      - Superficial differences only: synonyms, articles (a/an/the), punctuation, or a conversational wrapper ("The answer is X").
+      - The prediction correctly names the answer but adds extra (even incorrect) context around it — judge only the specific answer, not the surrounding sentences.
+
+      **Score "0" (Incorrect) — award only if:**
+      - The prediction names a different entity/value than the reference for the specific thing the question asks about.
+      - The prediction does not answer the question at all (off-topic, refuses, says it doesn't know).
+
+      **Inputs:**
+      - **Question:** {question}
+      - **Reference Answer:** {references}
+      - **Predicted Answer:** {prediction}
+
+      **Output Format:**
+      Respond ONLY with a valid JSON object with exactly two keys: "Reason" (one sentence) and "Score" (0 or 1).
+      Example: {{"Reason": "Prediction names 'Denver Broncos' which matches the reference.", "Score": 1}}
+
+      ---
+      **Question:** {question}
+      **Reference Answer:** {references}
+      **Predicted Answer:** {prediction}
+
+# Same dataset split as the Mamba eval runs for a fair comparison
+datasets:
+  squad: true
+  mrqa_squad: false
+  mrqa_newsqa: false
+  mrqa_trivia: false
+  mrqa_hotpot: false
+  mrqa_data_dir: "/path/to/data/MRQA/dev"
+  max_samples: 500
+
+inference:
+  batch_size: 16
+
+# Set to true to re-run inference even if cached results exist
+force_recompute_baselines: false
+force_recompute_experiment: false
+
+wandb:
+  project: "boa"
+  entity: null
+  tags: ["eval", "icae", "baseline"]

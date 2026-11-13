@@ -1,0 +1,39 @@
+# Third-party notices
+
+This repository is released under the MIT License (see `LICENSE`). It contains or adapts the following third-party work, which keeps its own license.
+
+## ICAE
+
+- Used in: `src/model.py` (`ICAECompressor`, `ICAEDestiller`) and the ICAE configs.
+- The ICAE compressor here is a reimplementation of the method; no upstream code is included. The official repository is <https://github.com/getao/icae> (CC0-1.0).
+- Paper: Ge et al., "In-context Autoencoder for Context Compression in a Large Language Model", ICLR 2024, [arXiv:2307.06945](https://arxiv.org/abs/2307.06945).
+
+## MRQA 2019 evaluation metrics
+
+- Used in: `src/evaluation/metrics.py` (vendored; span-overlap EM/F1 primitives).
+- Upstream: <https://github.com/mrqa/MRQA-Shared-Task-2019> (`mrqa_official_eval.py`).
+- License: MIT.
+
+```
+MIT License
+
+Copyright (c) 2019 Machine Reading for Question Answering Workshop
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
