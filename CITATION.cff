@@ -1,0 +1,68 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "Boa: Linear-Time Context Compression with State-Space Encoding"
+type: software
+license: MIT
+repository-code: "https://github.com/mserra0/boa-context-compression"
+authors:
+  - family-names: "Serra Ortega"
+    given-names: "Marc"
+  - family-names: "Barsky"
+    given-names: "Andrey"
+  - family-names: "Boned Riera"
+    given-names: "Carlos"
+  - family-names: "Ockier"
+    given-names: "Tomás"
+  - family-names: "Karatzas"
+    given-names: "Dimosthenis"
+preferred-citation:
+  type: article
+  title: "Linear-Time Context Compression with State-Space Encoding"
+  authors:
+    - family-names: "Serra Ortega"
+      given-names: "Marc"
+    - family-names: "Barsky"
+      given-names: "Andrey"
+    - family-names: "Boned Riera"
+      given-names: "Carlos"
+    - family-names: "Ockier"
+      given-names: "Tomás"
+    - family-names: "Karatzas"
+      given-names: "Dimosthenis"
+  year: 2026
+  journal: "arXiv preprint"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.33006"
+  url: "https://arxiv.org/abs/2610.33006"
+
+references:
+  - type: article
+    title: "Autoencoding-Free Context Compression for LLMs via Contextual Semantic Anchors"
+    authors:
+      - family-names: "Liu"
+        given-names: "Xin"
+      - family-names: "Zhao"
+        given-names: "Runsong"
+      - family-names: "Huang"
+        given-names: "Pengcheng"
+      - family-names: "Liu"
+        given-names: "Xinyu"
+      - family-names: "Xiao"
+        given-names: "Junyi"
+      - family-names: "Xiao"
+        given-names: "Chunyang"
+      - family-names: "Xiao"
+        given-names: "Tong"
+      - family-names: "Gao"
+        given-names: "Shengxiang"
+      - family-names: "Yu"
+        given-names: "Zhengtao"
+      - family-names: "Zhu"
+        given-names: "Jingbo"
+    year: 2025
+    journal: "arXiv preprint"
+    identifiers:
+      - type: other
+        value: "arXiv:2510.08907"
+    url: "https://arxiv.org/abs/2510.08907"

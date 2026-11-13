@@ -1,0 +1,56 @@
+sac:
+  work_dir: "/path/to/checkpoints/sac/r8"
+  run_name: "sac_fineweb10b_mrqa_r8"
+  max_new_tokens: 80
+
+judge:
+  model: "Qwen/Qwen3-32B"
+  base_url: "http://localhost:8080/v1"
+  max_concurrent: 32
+  max_tokens: 128
+  temperature: 1.0
+  prompt_template: |
+    You are evaluating a Question Answering system. Decide whether the Predicted
+    Answer contains the core answer requested by the Question and matches the
+    Reference Answer. Ignore harmless extra explanation.
+
+    Respond only with JSON containing "Reason" and binary "Score".
+    Question: {question}
+    Reference Answer: {references}
+    Predicted Answer: {prediction}
+
+datasets:
+  mrqa_data_dir: "/path/to/data/MRQA"
+  max_samples: null
+
+  in_domain:
+    squad: true
+    newsqa: true
+    triviaqa: true
+    hotpotqa: true
+    searchqa: true
+    naturalquestions: true
+
+  out_of_domain:
+    bioasq: true
+    drop: true
+    duorc: true
+    race: true
+    relationextraction: true
+    textbookqa: true
+
+inference:
+  batch_size: 1
+
+evaluation:
+  metric: "qa_f1"
+  conditions: ["student"]
+  clean_predictions: true
+
+force_recompute_baselines: false
+force_recompute_experiment: true
+
+wandb:
+  project: "boa"
+  entity: null
+  tags: ["eval", "sac", "baseline"]

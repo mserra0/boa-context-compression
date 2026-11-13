@@ -1,0 +1,62 @@
+{
+  "pretrain_training_config": {
+    "model_id": "/path/to/checkpoints/qwen3_1_7b_fullft/final",
+    "chunk_size": 256,
+    "total_batch_size": 16,
+    "batch_size_per_device": 1,
+    "device_count": 2,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 0.0001,
+    "max_grad_norm": 2.0,
+    "log_step": 100,
+    "valid_step": 100000000,
+    "save_step": 1000,
+    "token_budget": 10000000000,
+    "eval_samples": 1000,
+    "streaming": true
+  },
+  "pretrain_task_config": {
+    "is_pretrain": true,
+    "is_sft": false,
+    "chunk_size": 256,
+    "mem_size": 64,
+    "compress_ratio": 4,
+    "task_type": "Compress",
+    "use_pe": true,
+    "use_ae_loss": false,
+    "use_lm_loss": true
+  },
+  "sft_training_config": {
+    "model_id": "/path/to/checkpoints/qwen3_1_7b_fullft/final",
+    "chunk_size": 256,
+    "total_batch_size": 16,
+    "batch_size_per_device": 1,
+    "device_count": 2,
+    "gradient_accumulation_steps": 8,
+    "learning_rate": 5e-05,
+    "max_grad_norm": 2.0,
+    "log_step": 100,
+    "valid_step": 100000000,
+    "save_step": 100000000
+  },
+  "sft_task_config": {
+    "is_pretrain": false,
+    "is_sft": true,
+    "chunk_size": 256,
+    "mem_size": 64,
+    "compress_ratio": 4,
+    "task_type": "Compress",
+    "use_pe": true,
+    "use_ae_loss": false,
+    "use_lm_loss": true
+  },
+  "data_config": {
+    "dataset_repo": "/path/to/data/fineweb-edu/sample/100BT",
+    "samples_num": 1000000000,
+    "min_len": 129,
+    "max_len": 2048,
+    "model_id": "/path/to/checkpoints/qwen3_1_7b_fullft/final",
+    "instruction_dataset_repo": "/path/to/data/MRQA",
+    "streaming": true
+  }
+}
