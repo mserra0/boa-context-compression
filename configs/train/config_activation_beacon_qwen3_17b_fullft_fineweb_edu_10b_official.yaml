@@ -1,0 +1,63 @@
+# Activation Beacon pretraining over the Qwen3 1.7B full-finetuned checkpoint.
+#
+# This uses the qwen3_official backend: Qwen3 is loaded natively, but the
+# Activation Beacon recurrent memory/attention mechanism is ported from the
+# authors' official implementation. This is not the qwen3_simple token-insertion
+# baseline.
+
+model:
+  beacon_backend: "qwen3_official"
+  base_model_name_or_path: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  beacon_code_model: "namespace-Pt/beacon-qwen-2-7b-instruct"
+  dtype: "bf16"
+  attn_implementation: "sdpa"
+  local_files_only: true
+
+  # Scaled-down version of the authors' long-context Beacon pretraining setup.
+  # Use the larger 2048 window only if the GPU can hold it; otherwise drop both
+  # beacon_window and beacon_stride to 1024 or 512.
+  beacon_window: 128
+  beacon_stride: 128
+  beacon_attn: "full-coverage"
+  beacon_attend_prev: true
+  beacon_sink_size: 0
+  beacon_ratio: [2, 4, 8, 16]
+  beacon_ratio_mix: "step-random"
+  beacon_param: ["q", "k", "v"]
+  beacon_embed_init: "eos"
+  beacon_pos: "interleave"
+  beacon_parallel_window: 1
+
+data:
+  data_dir: "/path/to/data/fineweb-edu"
+  file_pattern: "sample/100BT/*.parquet"
+  text_column: "text"
+  # Keep the official min/max ratio approximately: 2400 / 20000 ~= 0.12.
+  # For max_length=8192 this becomes ~984, but the Beacon window requires at
+  # least beacon_window + 1 tokens.
+  min_length: 513
+  max_length: 4096
+  tokenizer_batch_size: 64
+  num_workers: 2
+  seed: 42
+
+training:
+  # 10B supervised next-token targets.
+  token_budget: 10000000000
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 5.0e-5
+  weight_decay: 0.0
+  warmup_tokens: 100000000
+  max_grad_norm: 1.0
+  logging_tokens: 10000000
+  save_every_tokens: 1000000000
+  mixed_precision: "bf16"
+
+paths:
+  output_dir: "/path/to/checkpoints/activation_beacon_pretrain/qwen3-17b-fullft/fineweb-edu-10b-official"
+
+wandb:
+  enabled: false
+  project: "boa"
+  name: "activation-beacon-qwen3-17b-fullft-fineweb-edu-10b-official"

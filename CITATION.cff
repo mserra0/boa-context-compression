@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "Boa: Linear-Time Context Compression with State-Space Encoding"
+type: software
+license: MIT
+repository-code: "https://github.com/mserra0/boa-context-compression"
+authors:
+  - family-names: "Serra Ortega"
+    given-names: "Marc"
+  - family-names: "Barsky"
+    given-names: "Andrey"
+  - family-names: "Boned Riera"
+    given-names: "Carlos"
+  - family-names: "Ockier"
+    given-names: "Tomás"
+  - family-names: "Karatzas"
+    given-names: "Dimosthenis"
+preferred-citation:
+  type: article
+  title: "Linear-Time Context Compression with State-Space Encoding"
+  authors:
+    - family-names: "Serra Ortega"
+      given-names: "Marc"
+    - family-names: "Barsky"
+      given-names: "Andrey"
+    - family-names: "Boned Riera"
+      given-names: "Carlos"
+    - family-names: "Ockier"
+      given-names: "Tomás"
+    - family-names: "Karatzas"
+      given-names: "Dimosthenis"
+  year: 2026
+  journal: "arXiv preprint"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.33006"
+  url: "https://arxiv.org/abs/2610.33006"
+
+references:
+  - type: article
+    title: "Long Context Compression with Activation Beacon"
+    authors:
+      - family-names: "Zhang"
+        given-names: "Peitian"
+      - family-names: "Liu"
+        given-names: "Zheng"
+      - family-names: "Xiao"
+        given-names: "Shitao"
+      - family-names: "Shao"
+        given-names: "Ninglu"
+      - family-names: "Ye"
+        given-names: "Qiwei"
+      - family-names: "Dou"
+        given-names: "Zhicheng"
+    year: 2024
+    journal: "arXiv preprint"
+    identifiers:
+      - type: other
+        value: "arXiv:2401.03462"
+    url: "https://arxiv.org/abs/2401.03462"

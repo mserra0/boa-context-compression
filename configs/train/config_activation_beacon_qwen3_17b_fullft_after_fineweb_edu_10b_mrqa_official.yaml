@@ -1,0 +1,59 @@
+# MRQA finetuning after Qwen3 1.7B Activation Beacon FineWeb-Edu pretraining.
+#
+# This uses the qwen3_official backend: the recurrent Activation Beacon memory
+# mechanism is ported from the authors' implementation to native Qwen3.
+
+model:
+  beacon_backend: "qwen3_official"
+  base_model_name_or_path: /path/to/checkpoints/activation_beacon_pretrain/qwen3-17b-fullft/fineweb-edu-10b-32n_128/final/
+  beacon_code_model: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  dtype: "bf16"
+  attn_implementation: "sdpa"
+  local_files_only: true
+
+  # Same geometry as the Qwen3 FineWeb-Edu pretraining config.
+  beacon_window: 128
+  beacon_stride: 128
+  beacon_attn: "full-coverage"
+  beacon_attend_prev: true
+  beacon_sink_size: 0
+  beacon_ratio: [2, 4, 8, 16 ]
+  beacon_ratio_mix: "step-random"
+  beacon_param: ["q", "k", "v"]
+  beacon_embed_init: "eos"
+  beacon_pos: "interleave"
+  beacon_parallel_window: 1
+
+data:
+  data_dir: "/path/to/data/MRQA"
+  split: "train"
+  max_samples: null
+  max_length: 4096
+  min_length: 129
+  validation_fraction: 0.01
+  seed: 42
+  preprocessing_num_proc: 8
+  preprocessing_batch_size: 128
+  datasets_cache_dir: "/path/to/checkpoints/dataset_cache/huggingface"
+  encoded_cache_dir: "/path/to/checkpoints/dataset_cache/activation_beacon/<cache_name>"
+  overwrite_encoded_cache: false
+
+training:
+  num_epochs: 3
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.0
+  warmup_steps: 0
+  max_grad_norm: 1.0
+  logging_steps: 10
+  num_workers: 0
+  mixed_precision: "bf16"
+
+paths:
+  output_dir: "/path/to/checkpoints/activation_beacon/qwen3-17b-fullft/fineweb-edu-10b-official-then-mrqa_window_128_official"
+
+wandb:
+  enabled: true
+  project: "boa"
+  name: "activation-beacon-qwen3-17b-fullft-fineweb-edu-10b-official-then-mrqa_window_128_official"

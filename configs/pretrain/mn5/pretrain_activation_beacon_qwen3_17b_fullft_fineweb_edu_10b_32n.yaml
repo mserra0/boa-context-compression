@@ -1,0 +1,74 @@
+# Activation Beacon pretraining over the Qwen3 1.7B full-finetuned checkpoint — 32 nodes.
+#
+# Multi-node variant (32 nodes x 4 GPUs = 128 ranks) of
+# configs/pretrain/mn5/pretrain_activation_beacon_qwen3_17b_fullft_fineweb_edu_10b.yaml.
+#
+# The single-GPU base config uses batch_size=1, gradient_accumulation_steps=8 (effective batch 8)
+# and learning_rate=5e-5. Here batch_size stays 1 and the global batch is set through gradient
+# accumulation (which adds no memory): 1 * 2 * 128 = 256 micro-batches per optimizer step, 32x the
+# base. The learning rate is sqrt-scaled accordingly: 5e-5 * sqrt(256 / 8) ~= 2.8e-4.
+#
+# token_budget, warmup_tokens, logging_tokens and save_every_tokens are global and
+# token-denominated (the token count is all-reduced across ranks), so they are unchanged from the
+# base config; everything else is identical so runs stay comparable.
+
+model:
+  beacon_backend: "qwen3_simple"
+  base_model_name_or_path: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  # Unused by the qwen3_simple backend (only the qwen2_official backend loads it);
+  # kept for parity with the base config.
+  beacon_code_model: "namespace-Pt/beacon-qwen-2-7b-instruct"
+  dtype: "bf16"
+  attn_implementation: "sdpa"
+  local_files_only: true
+
+  # Scaled-down version of the authors' long-context Beacon pretraining setup.
+  # Use the larger 2048 window only if the GPU can hold it; otherwise drop both
+  # beacon_window and beacon_stride to 1024 or 512.
+  beacon_window: 512
+  beacon_stride: 512
+  beacon_attn: "full-coverage"
+  beacon_attend_prev: true
+  beacon_sink_size: 0
+  beacon_ratio: [2, 4, 8]
+  beacon_ratio_mix: "step-random"
+  beacon_param: ["q", "k", "v"]
+  beacon_embed_init: "eos"
+  beacon_pos: "interleave"
+  beacon_parallel_window: 1
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B"
+  file_pattern: "sample/100BT/*.parquet"
+  text_column: "text"
+  # Keep the official min/max ratio approximately: 2400 / 20000 ~= 0.12.
+  # For max_length=8192 this becomes ~984, but the Beacon window requires at
+  # least beacon_window + 1 tokens.
+  min_length: 513
+  max_length: 4096
+  tokenizer_batch_size: 64
+  num_workers: 4
+  seed: 42
+
+training:
+  # 10B supervised next-token targets (GLOBAL, all-reduced across ranks).
+  token_budget: 10000000000
+  # Per-device micro-batch. Effective batch = 1 * 2 * 128 = 256 across all ranks.
+  batch_size: 1
+  gradient_accumulation_steps: 2
+  # sqrt-scaled from the single-GPU 5e-5 for the 32x larger effective batch.
+  learning_rate: 2.8e-4
+  weight_decay: 0.0
+  warmup_tokens: 100000000
+  max_grad_norm: 1.0
+  logging_tokens: 10000000
+  save_every_tokens: 1000000000
+  mixed_precision: "bf16"
+
+paths:
+  output_dir: "/path/to/checkpoints/activation_beacon_pretrain/qwen3-17b-fullft/fineweb-edu-10b-32n"
+
+wandb:
+  enabled: false
+  project: "boa"
+  name: "activation-beacon-qwen3-17b-fullft-fineweb-edu-10b"

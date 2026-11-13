@@ -1,0 +1,85 @@
+activation_beacon:
+  # Fine-tuned Activation Beacon checkpoint to evaluate (a local path, e.g. on offline cluster nodes).
+  beacon_backend: "qwen3_official"
+
+  model_name_or_path: "/path/to/checkpoints/activation_beacon/<finetune_run_dir>/checkpoint-epoch-1"
+  teacher_model_name_or_path: "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  run_name: "activation_beacon_qwen3_17b_mrqa_r16"
+  dtype: "bf16"
+  attn_implementation: "sdpa"
+  local_files_only: false
+  max_input_tokens: 20000
+  max_new_tokens: 80
+  # Matches the authors' LongBench QA evaluation: stop concise QA generations at newline.
+  newline_as_eos: true
+
+  # Preserve checkpoint window/stride/ratio values by leaving these null.
+  # adapt-1024 matches the authors' evaluation recipe.
+  beacon_window: null
+  beacon_stride: null
+  beacon_attn: null
+  beacon_ratio: 16
+  beacon_ratio_mix: "fixed"
+  beacon_param: null
+  beacon_sink_size: null
+  beacon_attend_prev: null
+  beacon_pos: null
+  beacon_parallel_window: 1
+
+judge:
+  model: "Qwen/Qwen3-32B"
+  base_url: "http://localhost:8080/v1"
+  max_concurrent: 32
+  max_tokens: 128
+  temperature: 1.0
+  prompt_template: |
+    You are evaluating a Question Answering system. Decide whether the Predicted
+    Answer contains the core answer requested by the Question and matches the
+    Reference Answer. Ignore harmless extra explanation.
+
+    Respond only with JSON containing "Reason" and binary "Score".
+    Question: {question}
+    Reference Answer: {references}
+    Predicted Answer: {prediction}
+
+datasets:
+  mrqa_data_dir: "/path/to/data/MRQA"   # contains dev/ and dev_ood/
+  max_samples: null                              # per dataset; null for full dev sets
+
+  # In-distribution dev sets (MRQA in-domain) -> dev/
+  in_domain:
+    squad: true
+    newsqa: true
+    triviaqa: true
+    hotpotqa: true
+    searchqa: true
+    naturalquestions: true
+
+  # Out-of-distribution dev sets (MRQA out-of-domain) -> dev_ood/
+  out_of_domain:
+    bioasq: true
+    drop: true
+    duorc: true
+    race: true
+    relationextraction: true
+    textbookqa: true
+inference:
+  batch_size: 1
+
+# LongBench-style MRQA scoring: normalize answers, compute token-level QA F1,
+# take max over gold answers, and report 100 * mean(F1). Use
+# "judge_accuracy" for LLM-judge binary scoring (needs the judge section above).
+evaluation:
+  metric: "qa_f1"
+  conditions: ["student"]
+  # Keep raw generations, but score an extracted gold-matching answer span when
+  # verbose teacher outputs contain the correct answer.
+  clean_predictions: true
+
+force_recompute_baselines: False
+force_recompute_experiment: True
+
+wandb:
+  project: "boa"
+  entity: null
+  tags: ["eval", "activation-beacon", "baseline"]
