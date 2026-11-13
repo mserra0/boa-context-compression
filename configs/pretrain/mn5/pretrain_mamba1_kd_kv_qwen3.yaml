@@ -1,0 +1,59 @@
+# KD-pretraining (teacher-forced KL, NOT continuation-CE) with KV-compression injection.
+# Mamba1 1.4B compressor, left-padded [B,I]; frozen decoder = Qwen3 1.7B FullFT.
+# KD variant of configs/pretrain/mn5/qwen3_1-7b/pretrain_mamba1_kv_qwen3.yaml on `main`: identical models, data,
+# batch, LR and step budget — ONLY the objective changes (pretrain_loss: ce -> kd). The
+# teacher is the SAME frozen Qwen3 conditioned on the PLAINTEXT prefix X, teacher-forced over
+# the corpus continuation Y; the student sees only the COMPRESSED X (KV cache + trigger). Same
+# X, same Y, soft-vs-hard labels -> directly comparable to the LM-CE kv run.
+#
+# Cost vs the LM-CE run: KD adds a frozen-teacher forward pass per step (teacher over [X|Y],
+# <=1280 tok) plus a teacher-logits buffer (~student-sized; teacher batch B = batch_size = 3
+# here), increasing step time and memory.
+#
+# Intended scale: 32 nodes x 4 GPUs = 128 GPUs; context tokens per optimizer step =
+# batch_size x grad_accum x world_size x average real context length (Mamba1, padded)
+# or tokens_per_batch x grad_accum x world_size (Mamba2, packed).
+# Run: sbatch scripts/utils/mn5_train_mamba.slurm configs/pretrain/mn5/pretrain_mamba1_kd_kv_qwen3.yaml
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-1.4b-hf"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba"
+  compression_ratio: 0.1
+  objective: "lm"
+  prompt_mode: "kv"
+  pretrain_loss: "kd"
+  temperature: 2.0
+
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 3
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_kd_kv_Mamba1_1.4B_Qwen3-1.7B-FullFT_10B"
+  tags: ["pretrain", "kd", "KV-injection", "mamba1", "padded", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

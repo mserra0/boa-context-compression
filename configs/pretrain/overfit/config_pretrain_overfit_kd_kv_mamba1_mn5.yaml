@@ -1,0 +1,61 @@
+# KD-pretraining OVERFIT smoke — Mamba1 1.4B. KV-injection student.
+# Reproduces configs/pretrain/mn5/qwen3_1-7b/pretrain_mamba1_kv_qwen3.yaml on `main` (prompt_mode: kv — compressed
+# hidden -> per-layer K/V cache + learned trigger, NOT soft-prompt embeds) but swaps the LM-CE
+# objective for KD (pretrain_loss: kd). Same models/paths (real Qwen3-1.7B-FullFT teacher,
+# mamba-1.4b-hf snapshot, gpt-neox tokenizer, FineWeb-EDU 100BT), shrunk to a 200-step overfit
+# curve on a tiny fixed subset (overfit: true -> the loader is cycled).
+# Mamba1 cannot pack -> fixed batch_size + left-pad (DistributedLengthGroupedSampler);
+# no dataloading block (token-budget packing is Mamba2-only).
+# Run on a 4-GPU node: CUDA_VISIBLE_DEVICES=0,1,2,3 bash scripts/run_training.sh configs/pretrain/overfit/config_pretrain_overfit_kd_kv_mamba1_mn5.yaml
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba-1.4b-hf"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba"
+  compression_ratio: 0.1
+  objective: "lm"
+  prompt_mode: "kv"
+  pretrain_loss: "kd"
+  temperature: 2.0
+
+# Training configuration (step-based) — overfit smoke
+# 200 steps so the fixed 512-sample subset is cycled ~12x (eff batch = bs2*accum4*4gpu = 32/step);
+# enough epochs to visibly memorize and drive the KD loss toward its floor.
+training:
+  max_steps: 200
+  warmup_steps: 10
+  batch_size: 2
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  eval_interval: 20
+  save_interval: 1000
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+  overfit: true
+
+# Data configuration — FineWeb-EDU, capped to a tiny fixed subset
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  # Sized so each of the 4 DDP ranks gets a non-degenerate shard after min_doc_tokens
+  # filtering (DistributedLengthGroupedSampler pads to equal per-rank counts).
+  val_samples: 32
+  max_samples: 512
+  seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+# WandB configuration
+wandb:
+  project: "boa"
+  entity: null
+  name: "overfit_KD_kv_Mamba1_1.4B_Qwen3-1.7B-FullFT"
+  tags: ["pretrain", "kd", "KV-injection", "mamba1", "padded", "fineweb", "qwen3FullFT", "overfit"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name

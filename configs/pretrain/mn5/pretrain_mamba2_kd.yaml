@@ -1,0 +1,60 @@
+# KD-pretraining (continuation KD, teacher-forced) — Mamba2 1.3B, packed [1,T]
+# Ablation of pretrain_mamba2_lm.yaml (on `main`): SAME model/data/hyperparameters, but the
+# continuation objective is soft KD instead of hard CE. The frozen teacher conditions
+# on the PLAINTEXT prefix X and teacher-forces the corpus continuation Y in one extra
+# forward; the compressed-prefix student matches that distribution (kd_lm_loss, T=2.0).
+# The KD alignment is paid once at pretraining; finetuning can then use plain LM-CE-SFT on any
+# dataset, warm-started from this checkpoint.
+model:
+  mamba_model_name: &ssm_name "state-spaces/mamba2-1.3b"
+  llm_model_name: &llm_name "/path/to/checkpoints/qwen3_1_7b_fullft/final"
+  compressor_type: "mamba2"
+  compression_ratio: 0.1
+  objective: "lm"
+  prompt_mode: "embed"
+  pretrain_loss: "kd"
+  temperature: 2.0
+
+# Training configuration (step-based)
+training:
+  max_steps: 10000
+  warmup_steps: 50
+  batch_size: 8
+  learning_rate: 1.0e-4
+  weight_decay: 0.01
+  eval_interval: 50
+  save_interval: 100
+  log_interval: 5
+  gradient_clip_max_norm: 1.0
+  gradient_accumulation_steps: 4
+
+# Dataloading (token-budget packing — Mamba2 only)
+dataloading:
+  packing: "token_budget"
+  tokens_per_batch: 4096
+  max_seqs_per_batch: 32
+
+# Data configuration
+data:
+  data_dir: "/path/to/data/fineweb-edu-10B/sample/100BT"
+  compressor_tokenizer_name: "EleutherAI/gpt-neox-20b"
+  min_doc_tokens: 320
+  max_ctx: 1024
+  max_pred: 256
+  val_samples: 2000
+  max_samples: null
+  seed: 42
+
+# Paths
+paths:
+  checkpoint_dir: "/path/to/checkpoints"
+  output_dir: "./outputs_mn5"
+
+# WandB configuration
+wandb:
+  project: "boa"
+  entity: null
+  name: "pretrain_KD_embed_Mamba2_1.3B_Qwen3-1.7B-FullFT_10B"
+  tags: ["pretrain", "kd", "embed-prompt", "mamba2", "packed", "fineweb", "qwen3FullFT", "DDP"]
+  mamba_model_name: *ssm_name
+  llm_model_name: *llm_name
