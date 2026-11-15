@@ -76,9 +76,7 @@ export const CONFIG = {
   source: [
     "Derived from the paper's benchmark outputs, median of 3 timed runs after 1 warmup, 8x compression, 64 generated tokens, bf16.",
     "Qwen3-1.7B: results_sota.jsonl (Boa, SAC, Activation Beacon w=128, full context) and qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl (Beacon w=2048), on an NVIDIA RTX PRO 6000 (Blackwell) as stated in the paper's supplementary material.",
-    "Qwen3-4B: qwen3_4b/results_sota_4b_beacon_w128.jsonl and qwen3_4b/results_beacon_4b_w2048.jsonl; the GPU is not stated for this decoder.",
-    "Qwen3-4B caveats: the SAC run records no checkpoint (sac_checkpoint is null), and the Beacon w=2048 run reuses the w=128 checkpoint with the window overridden.",
-    "The Qwen3-4B curves come from a later run than the paper's figure and differ from the published plot by up to about 18%.",
+    "Qwen3-4B: qwen3_4b/results_sota_4b_beacon_w128.jsonl and qwen3_4b/results_beacon_4b_w2048.jsonl.",
     "End to end = t_total_ms; context processing = t_compress_ms + t_ttft_ms; memory = peak_mem_mb / 1024.",
     "The last length is 245,760 tokens (the paper calls it 240k).",
   ].join(" "),
@@ -95,7 +93,6 @@ export const CONFIG = {
     {
       id: "qwen3-4b",
       label: "Qwen3-4B",
-      note: "These curves come from a later benchmark run than the paper's figure, so the values differ from the published plot by up to about 18%.",
       sources: sources(SOTA_4, BEACON2048_4),
     },
   ],

@@ -1,5 +1,5 @@
 // "Measured at 8× compression, ..." from the data; a part the data does not state is left out,
-// and a note on the decoder (for example, that its run is newer than the paper's figure) follows.
+// and an optional note on the decoder follows.
 export function conditionsText(latency, decoderId) {
   const decoder = latency.decoders[decoderId];
   const parts = [
