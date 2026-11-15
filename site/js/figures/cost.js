@@ -2,6 +2,7 @@ import { onVisible, prefersReducedMotion } from "../lib/motion.js";
 import { linearScale, logScale } from "../lib/scales.js";
 import { measurement, speedup } from "../lib/latency.js";
 import { formatGigabytes, formatSeconds, formatTokens } from "../lib/format.js";
+import { conditionsText } from "../lib/conditions.js";
 import { speedSentence } from "../lib/speed.js";
 import { lineChart } from "./line-chart.js";
 
@@ -11,7 +12,6 @@ const BAR_TWEEN_S = 0.4;
 // The time bars use a log axis that starts this many times below the shortest time,
 // so the shortest bar still has some length.
 const LOG_BAR_HEADROOM = 3;
-const APPROXIMATE_NOTE = "Approximate values, read from the paper's figure.";
 
 const WIDE_QUERY = "(min-width: 56em)";
 const CHART_LAYOUTS = {
@@ -150,7 +150,8 @@ export function mount(root, data) {
     node("label", {class: "choice"}, [others, " Show other compressors"]),
   ]);
   stage.append(controls);
-  if (latency.approximate === true) stage.append(node("p", {class: "cost__note", text: APPROXIMATE_NOTE}));
+  const conditions = node("p", {class: "cost__note"});
+  stage.append(conditions);
 
   const blocks = BLOCKS.map((block) => buildBlock(block, methods));
   stage.append(node("div", {class: "cost__blocks"}, blocks.map((b) => b.root)));
@@ -211,6 +212,7 @@ export function mount(root, data) {
 
   const update = ({tween}) => {
     const len = lengths[state.index];
+    conditions.textContent = conditionsText(latency, state.decoder);
     const tokens = `${formatTokens(len)} tokens`;
     length.value.textContent = tokens;
     length.input.setAttribute("aria-valuetext", tokens);

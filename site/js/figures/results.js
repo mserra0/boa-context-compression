@@ -1,6 +1,6 @@
 import { onVisible, prefersReducedMotion } from "../lib/motion.js";
 import { headlines } from "../lib/headlines.js";
-import { formatTokens } from "../lib/format.js";
+import { formatTokensExact } from "../lib/format.js";
 import { lineChart } from "./line-chart.js";
 
 const WIDE_QUERY = "(min-width: 56em)";
@@ -41,11 +41,11 @@ function headlineItems(data) {
   if (h.speedups.length > 0) {
     const [first, ...rest] = h.speedups;
     const more = rest.map((s) => ` ${s.factor}× with ${s.decoder}.`).join("");
-    const approximate = latency.approximate === true ? " Approximate, read from the paper's figure." : "";
+    const reported = first.reported ? " As reported in the paper." : "";
     items.push({
       value: first.factor,
       suffix: "×",
-      text: `lower end-to-end latency than Activation Beacon (w=128) at ${formatTokens(first.tokens)} tokens, with ${first.decoder}.${more}${approximate}`,
+      text: `lower end-to-end latency than Activation Beacon (w=128) at ${formatTokensExact(first.tokens)} tokens, the longest length measured, with ${first.decoder}.${more}${reported}`,
     });
   }
   items.push({

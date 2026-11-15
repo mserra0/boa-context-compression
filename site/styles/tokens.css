@@ -54,6 +54,7 @@
   --ink: #1b1b1a;
   --ink-muted: #5e5d59;    /* 6.5:1 on paper */
   --rule: #dededb;         /* plots: grid lines */
+  --mask-ink: #fff;        /* SVG mask luminance for the line reveal, not a page colour */
 
   /* Type */
   --font-text: "Source Serif 4", "Iowan Old Style", Georgia, serif;

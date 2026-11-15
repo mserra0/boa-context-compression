@@ -2,7 +2,7 @@ import { el } from "../lib/svg.js";
 import { onVisible, prefersReducedMotion } from "../lib/motion.js";
 import { keptIndices } from "../lib/compression.js";
 import { measurement, speedup } from "../lib/latency.js";
-import { formatFactor, formatSeconds, formatTokens } from "../lib/format.js";
+import { formatFactor, formatSeconds, formatTokensExact } from "../lib/format.js";
 import { rowWidth, tokenLeft, tokenRow } from "./tokens.js";
 
 // Diagram parameters, not measurements.
@@ -79,7 +79,8 @@ function raceModel(latency) {
     timeScale,
     start: FADE_S + REST_S,
     decoderLabel: latency.decoders[DECODER].label,
-    approximate: latency.approximate === true,
+    ratio: latency.ratio,
+    generatedTokens: latency.generatedTokens,
   };
 }
 
@@ -281,13 +282,14 @@ function showFinalFrame(scene, model) {
   updateClocks(scene, model, Infinity);
 }
 
+// Says where the lane times come from, filled from the data the race replays.
 function describeSetting(model) {
-  const parts = [
-    `End-to-end time with ${model.decoderLabel} for a ${formatTokens(LENGTH)}-token context; each square stands for ${formatTokens(LENGTH / CONTEXT_TOKENS)} tokens.`,
-  ];
-  if (model.timeScale < 1) parts.push(`The clocks run ${formatFactor(1 / model.timeScale)} faster than real time.`);
-  if (model.approximate) parts.push("The times are approximate, read from the paper’s figure.");
-  return parts.join(" ");
+  const times = `Boa at ${model.ratio}× compression takes ${formatSeconds(model.measured.boa)}, the same LLM reading the full context ${formatSeconds(model.measured.full)}, ${formatFactor(model.factor)} faster`;
+  const speed = model.timeScale < 1 ? `The animation is sped up ${formatFactor(1 / model.timeScale)} in proportion, and` : "The animation runs in real time, and";
+  return [
+    `Lane times are the measured end-to-end latencies (context processing plus ${model.generatedTokens} generated tokens) for ${model.decoderLabel} at ${formatTokensExact(LENGTH)} context tokens: ${times}.`,
+    `${speed} its ${CONTEXT_TOKENS} squares stand for those ${formatTokensExact(LENGTH)} tokens, so it is a schematic, not one square per token.`,
+  ].join(" ");
 }
 
 function button(label) {

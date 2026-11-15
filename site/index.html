@@ -141,8 +141,8 @@
         <dl class="limitations">
           <dt>Verbatim span extraction is weaker.</dt>
           <dd>Relation Extraction asks the model to copy exact spans of text. This is the setting in which attention-based Transformers exceed state-space models, and here Activation Beacon leads Boa at every compression ratio.</dd>
-          <dt>Long-context results are slightly below Activation Beacon.</dt>
-          <dd>On long-context benchmarks Boa is comparable to Activation Beacon on summarisation (BookSum, GovReport) but behind it on question answering (QASPER). We attribute the gap to a weaker long-context prior: the Mamba checkpoint we start from was pretrained only on short sequences, whereas Activation Beacon works directly on full-attention windows across the extended context.</dd>
+          <dt>Long-context question answering trails Activation Beacon.</dt>
+          <dd>At 32K tokens and 8× and 16× compression, Boa averages 1.3 to 1.4 F1 below Activation Beacon, and the gap is concentrated in question answering: on QASPER Boa trails by 5.4 to 6.4 F1. On summarisation the two are close: Boa leads on GovReport by 1.9 to 4.0 F1 and trails on BookSum by 0.8 to 1.4. We attribute the gap to a weaker long-context prior: the Mamba checkpoint we start from was pretrained only on sequences of up to 2K tokens, whereas Activation Beacon works directly on full-attention windows across the extended context.</dd>
         </dl>
       </div>
     </section>
