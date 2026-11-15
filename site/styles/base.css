@@ -1,0 +1,277 @@
+/* Element defaults: reset, text, links, controls, tables, code. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: var(--leading);
+  font-kerning: normal;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--step-3);
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+h3 {
+  font-size: var(--step-1);
+}
+
+p,
+ul,
+dl,
+pre {
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+var {
+  font-style: italic;
+  font-synthesis: style;
+}
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: var(--boa);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: color var(--duration) var(--ease), text-decoration-color var(--duration) var(--ease);
+}
+
+a:hover {
+  color: var(--boa-ink);
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--boa-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Controls use the sans face. */
+.button,
+button,
+input,
+select,
+label {
+  font-family: var(--font-ui);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), background-color var(--duration) var(--ease);
+}
+
+.button:hover {
+  border-color: var(--ink-muted);
+  background: var(--paper-sunk);
+  color: var(--ink);
+}
+
+.button:active {
+  background: var(--rule);
+}
+
+.button--small {
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  font-size: var(--step--1);
+}
+
+/* Tables: booktabs rules, sans figures. */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1.4;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.data-table caption {
+  padding-bottom: var(--space-2);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  font-weight: 600;
+  text-align: left;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-2) var(--space-2);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.data-table th:first-child,
+.data-table td:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  padding-right: 0;
+}
+
+.data-table thead th {
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.data-table thead tr:last-child th {
+  border-bottom: 1px solid var(--ink);
+}
+
+.data-table .data-table__group {
+  text-align: center;
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule);
+}
+
+.data-table tbody th {
+  font-weight: 500;
+}
+
+/* Narrow screens: let method names wrap so the scores fit without scrolling. */
+@media (max-width: 30em) {
+  .data-table {
+    font-size: 0.8125rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding-inline: 0.2rem;
+  }
+
+  .data-table th:first-child {
+    white-space: normal;
+  }
+}
+
+.data-table strong {
+  font-weight: 650;
+}
+
+.data-table tfoot th,
+.data-table tfoot td {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+.data-table tfoot tr:first-child th,
+.data-table tfoot tr:first-child td {
+  border-top: 1px solid var(--rule);
+}
+
+pre,
+code {
+  font-family: var(--font-mono);
+}
+
+pre {
+  overflow-x: auto;
+  padding: var(--space-4);
+  background: var(--paper-sunk);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* Tabs: a row of native buttons over a panel. */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tab {
+  min-height: 2.75rem;
+  margin-bottom: -1px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--boa);
+  color: var(--ink);
+}
+
+.column > .tabs + .table-scroll {
+  margin-top: var(--space-4);
+}

@@ -1,0 +1,97 @@
+/*
+ * Design tokens. Figure colours are sampled from the paper's figures:
+ *   Method.svg   fill and stroke values of the overview figure
+ *   plots        end_to_end_pair_vertical(2).png and latency_memory_strip.png (line colours)
+ * Light theme only.
+ */
+
+@font-face {
+  font-family: "Source Serif 4";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-serif-4-latin-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/inter-latin-variable.woff2") format("woff2");
+}
+
+:root {
+  color-scheme: light;
+
+  /* Method colours */
+  --boa: #2a78d6;          /* plots: Boa line */
+  --boa-ink: #1f5fae;      /* --boa darkened for text on paper (6.2:1) */
+  --kv: #c6e9e4;           /* Method.svg: compressed tokens and KV cache fill */
+  --kv-hatch: #5cada2;     /* Method.svg: KV cache hatching */
+  --kv-stroke: #02584c;    /* Method.svg: KV cache border */
+  --mamba: #ceadf0;        /* Method.svg: Mamba 2 block */
+  --context: #d9d9d9;      /* Method.svg: context tokens */
+  --teacher: #acd7ff;      /* Method.svg: teacher generation tokens */
+  --student: #e6d1fb;      /* Method.svg: student generation tokens */
+  --llm: #eaf5ff;          /* Method.svg: Transformer LLM block fill */
+  --frozen: #0075e2;       /* Method.svg: projection outlines and snowflake */
+  --boa-model: #6f6f6f;    /* Method.svg: dashed outline of the trained Boa model */
+  --flame: #ec6f59;        /* Method(1).png: flame marking trained parts */
+  --flame-core: #fad15c;   /* Method(1).png: inner flame */
+
+  /* Baselines, only inside comparison charts */
+  --beacon-128: #e34948;   /* plots: Activation Beacon (w=128), solid */
+  --beacon-2048: #8f2321;  /* plots: Activation Beacon (w=2048), dash-dot */
+  --sac: #4a3aa7;          /* plots: SAC */
+  --full: #6b6a66;         /* plots: Full context, dashed */
+  --full-dash: 6 4;
+  --beacon-2048-dash: 8 3 2 3; /* plots: Activation Beacon (w=2048), dash-dot */
+
+  /* Page */
+  --paper: #fdfdfb;
+  --paper-sunk: #f5f5f2;
+  --ink: #1b1b1a;
+  --ink-muted: #5e5d59;    /* 6.5:1 on paper */
+  --rule: #dededb;         /* plots: grid lines */
+  --mask-ink: #fff;        /* SVG mask luminance for the line reveal, not a page colour */
+
+  /* Type */
+  --font-text: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --step--1: 0.875rem;
+  --step-0: 1.125rem;
+  --step-1: 1.3125rem;
+  --step-2: 1.625rem;
+  --step-3: clamp(1.875rem, 1.4rem + 2vw, 2.75rem);
+  --leading: 1.6;
+  --leading-tight: 1.2;
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Measure */
+  --measure: 36rem;        /* about 68 characters of body text */
+  --figure-max: 1100px;
+  --gutter: 1rem;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration: 240ms;
+}
+
+@media (min-width: 40em) {
+  :root {
+    --gutter: 2rem;
+  }
+}

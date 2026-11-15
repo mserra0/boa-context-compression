@@ -1,0 +1,51 @@
+{
+  "decoder": "Qwen3-1.7B",
+  "ratios": [4, 8, 16],
+  "methods": [
+    {"id": "boa", "label": "Boa"},
+    {"id": "beacon", "label": "Activation Beacon"},
+    {"id": "sac", "label": "SAC"}
+  ],
+  "inDomain": {
+    "full": {"em": 73.61, "f1": 83.74},
+    "none": {"em": 9.11, "f1": 13.46},
+    "byRatio": {
+      "4": {
+        "sac": {"em": 62.94, "f1": 75.62, "normEm": 83.46, "normF1": 88.45},
+        "beacon": {"em": 61.69, "f1": 75.28, "normEm": 81.52, "normF1": 87.96},
+        "boa": {"em": 70.14, "f1": 81.29, "normEm": 94.62, "normF1": 96.51}
+      },
+      "8": {
+        "sac": {"em": 57.36, "f1": 71.03, "normEm": 74.81, "normF1": 81.92},
+        "beacon": {"em": 58.82, "f1": 73.01, "normEm": 77.07, "normF1": 84.73},
+        "boa": {"em": 69.02, "f1": 80.46, "normEm": 92.88, "normF1": 95.33}
+      },
+      "16": {
+        "sac": {"em": 45.98, "f1": 60.14, "normEm": 46.27, "normF1": 66.42},
+        "beacon": {"em": 55.48, "f1": 69.8, "normEm": 71.89, "normF1": 80.17},
+        "boa": {"em": 68.79, "f1": 80.16, "normEm": 92.53, "normF1": 94.91}
+      }
+    }
+  },
+  "outOfDomain": {
+    "full": {"em": 60.27, "f1": 71.59},
+    "none": {"em": 13.13, "f1": 17.97},
+    "byRatio": {
+      "4": {
+        "sac": {"em": 52.97, "f1": 64.56, "normEm": 84.51, "normF1": 86.89},
+        "beacon": {"em": 51.61, "f1": 64.11, "normEm": 81.63, "normF1": 86.05},
+        "boa": {"em": 51.49, "f1": 63.69, "normEm": 81.37, "normF1": 85.27}
+      },
+      "8": {
+        "sac": {"em": 45.23, "f1": 57.09, "normEm": 68.1, "normF1": 72.96},
+        "beacon": {"em": 49.88, "f1": 62.24, "normEm": 77.96, "normF1": 82.56},
+        "boa": {"em": 49.75, "f1": 62.57, "normEm": 77.68, "normF1": 83.18}
+      },
+      "16": {
+        "sac": {"em": 37.88, "f1": 49.46, "normEm": 52.5, "normF1": 58.73},
+        "beacon": {"em": 47.41, "f1": 59.13, "normEm": 72.72, "normF1": 76.76},
+        "boa": {"em": 49.42, "f1": 61.91, "normEm": 76.98, "normF1": 81.95}
+      }
+    }
+  }
+}

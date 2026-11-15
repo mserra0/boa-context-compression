@@ -1,0 +1,848 @@
+/* Figure frame shared by every figure module. */
+
+.figure {
+  width: 100%;
+  max-width: calc(var(--figure-max) + 2 * var(--gutter));
+  margin: var(--space-7) auto 0;
+  padding-inline: var(--gutter);
+}
+
+/* Figure labels, legends and controls use the sans face. */
+.figure__stage {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1.4;
+}
+
+.figure__stage svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.figure__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  padding: var(--space-6) var(--space-5);
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  color: var(--ink-muted);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  text-align: center;
+}
+
+.figure.is-ready .figure__fallback {
+  display: none;
+}
+
+.figure figcaption {
+  max-width: var(--measure);
+  margin: var(--space-4) auto 0;
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* Controls under or above a figure: native buttons and radio groups. */
+.figure__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* .button sets display, which would otherwise override the hidden attribute. */
+.figure__controls [hidden] {
+  display: none;
+}
+
+.figure__controls:first-child {
+  margin: 0 0 var(--space-4);
+}
+
+.figure__readout {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.choice-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* A floated legend sits on the same line as the options. */
+.choice-group legend {
+  float: left;
+  padding: 0;
+  color: var(--ink-muted);
+}
+
+.choice-group__options {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color var(--duration) var(--ease), background-color var(--duration) var(--ease);
+}
+
+.choice:hover {
+  border-color: var(--ink-muted);
+}
+
+.choice:has(input:checked) {
+  border-color: var(--boa-ink);
+  background: var(--paper-sunk);
+}
+
+.choice input {
+  margin: 0;
+  accent-color: var(--boa-ink);
+}
+
+/* Diagram vocabulary shared by the token figures (colours from Method.svg). */
+.token {
+  stroke: var(--ink);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.token--context {
+  fill: var(--context);
+}
+
+.token--ghost {
+  fill: var(--context);
+  opacity: 0.3;
+}
+
+.token--soft {
+  fill: var(--kv);
+  stroke: var(--kv-stroke);
+}
+
+.token--answer,
+.token--teacher {
+  fill: var(--teacher);
+}
+
+.token--student {
+  fill: var(--student);
+}
+
+.block {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.block--llm {
+  fill: var(--llm);
+}
+
+.block--mamba {
+  fill: var(--mamba);
+}
+
+/* Tabular figures would also space the hyphen in "Mamba-2"; only the clocks need them. */
+.diagram-label {
+  fill: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: normal;
+}
+
+.diagram-label--muted {
+  fill: var(--ink-muted);
+  font-weight: 400;
+}
+
+/* Race */
+.figure__stage svg.race,
+.figure__stage svg.ratio {
+  width: 100%;
+}
+
+/* The narrow layouts are drawn for phones; on wider screens they stop growing,
+   and their controls stay aligned with them. */
+.figure__stage:has(> svg.race--narrow),
+.figure__stage:has(> svg.ratio--narrow) {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.race__lane {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.race__lane--boa,
+.race__clock--boa,
+.race__factor {
+  fill: var(--boa-ink);
+}
+
+.race__clock {
+  fill: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.race__factor {
+  font-weight: 600;
+}
+
+.race__sweep {
+  fill: var(--paper);
+  fill-opacity: 0.65;
+}
+
+.race__arrow {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Ratio */
+.ratio__link {
+  stroke: var(--kv-stroke);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Series colours, shared by the line chart, its legend and the cost bars. */
+.series--boa { --series: var(--boa); }
+.series--sac { --series: var(--sac); }
+.series--beacon128 { --series: var(--beacon-128); }
+.series--beacon2048 { --series: var(--beacon-2048); --series-dash: var(--beacon-2048-dash); }
+.series--full { --series: var(--full); --series-dash: var(--full-dash); }
+
+/* Line chart */
+.line-chart__svg {
+  width: 100%;
+}
+
+.line-chart__rule {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.line-chart__axis {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.line-chart__tick {
+  fill: var(--ink-muted);
+}
+
+.line-chart__title {
+  fill: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: normal;
+}
+
+.line-chart__line {
+  fill: none;
+  stroke: var(--series, var(--ink));
+  stroke-width: 1.75;
+  stroke-dasharray: var(--series-dash, none);
+  stroke-linejoin: round;
+}
+
+.is-emphasis .line-chart__line {
+  stroke-width: 3.5;
+}
+
+.line-chart__reveal {
+  fill: none;
+  stroke: var(--mask-ink);
+  stroke-width: 14;
+}
+
+.line-chart__dot {
+  fill: var(--series, var(--ink));
+  stroke: var(--paper);
+  stroke-width: 1;
+}
+
+.line-chart__hit {
+  fill: transparent;
+}
+
+.line-chart__point {
+  cursor: pointer;
+  outline: none;
+}
+
+.line-chart__point:focus-visible .line-chart__dot,
+.line-chart__point:hover .line-chart__dot {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.line-chart__point:focus-visible .line-chart__hit {
+  fill: none;
+  stroke: var(--boa-ink);
+  stroke-width: 2;
+}
+
+.line-chart__marker-line {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.line-chart__ring {
+  fill: none;
+  stroke: var(--series, var(--ink));
+  stroke-width: 2;
+}
+
+.line-chart__marker-backing {
+  fill: var(--paper);
+}
+
+.line-chart__marker-x {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.line-chart__marker-text {
+  fill: var(--ink);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.line-chart__tip {
+  pointer-events: none;
+}
+
+.line-chart__tip-box {
+  fill: var(--paper);
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.line-chart__tip-text {
+  fill: var(--ink);
+}
+
+.line-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-3);
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+}
+
+.line-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.line-chart__legend-item[hidden] {
+  display: none;
+}
+
+.line-chart__legend-item.is-emphasis {
+  font-weight: 600;
+}
+
+.line-chart__swatch {
+  flex: none;
+}
+
+/* Cost: controls, bars and the latency chart */
+.cost__controls {
+  gap: var(--space-4) var(--space-5);
+}
+
+/* The slider has the first row to itself; the decoder choice and the checkbox share the second. */
+.cost-slider {
+  flex: 1 1 100%;
+}
+
+.cost-slider > * {
+  max-width: 40rem;
+}
+
+.cost-slider__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.cost-slider__head label {
+  color: var(--ink-muted);
+}
+
+.cost-slider__value {
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+/* Vertical swipes that start on the slider still scroll the page. */
+.cost-slider__input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  accent-color: var(--boa-ink);
+  touch-action: pan-y;
+  cursor: pointer;
+}
+
+.cost-slider__ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+.cost__note {
+  margin-top: var(--space-3);
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.cost__blocks {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 56em) {
+  .cost__blocks {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+.cost-block h3,
+.cost__chart h3 {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Two lines, so the bars below do not move when the sentence changes length. */
+.cost-block__lede {
+  min-height: 2.8em;
+  margin-top: var(--space-1);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+}
+
+.cost-block__lede[hidden],
+.cost-bars[hidden],
+.cost-bar[hidden],
+.cost-block__note[hidden] {
+  display: none;
+}
+
+.cost-bars {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.cost-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem var(--space-3);
+  align-items: baseline;
+}
+
+.cost-bar__value {
+  font-weight: 600;
+}
+
+.cost-bar.is-emphasis .cost-bar__label,
+.cost-bar.is-emphasis .cost-bar__value {
+  color: var(--boa-ink);
+  font-weight: 600;
+}
+
+.cost-bar__track {
+  grid-column: 1 / -1;
+  height: 0.625rem;
+  border-radius: 3px;
+  background: var(--paper-sunk);
+  overflow: hidden;
+}
+
+.cost-bar__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--series, var(--ink-muted));
+}
+
+.cost-block__note {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  color: var(--ink-muted);
+}
+
+.cost__chart {
+  margin-top: var(--space-7);
+}
+
+.cost__chart h3 + * {
+  margin-top: var(--space-3);
+}
+
+/* The narrow chart is drawn for phones; on wider screens it stops growing. */
+.cost__chart-host--narrow {
+  max-width: 32rem;
+}
+
+/* Method: the diagram beside (wide) or above (narrow) the list of its steps. */
+.method__layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 56em) {
+  .method__layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--space-7);
+  }
+}
+
+.figure__stage svg.method__svg {
+  width: 100%;
+}
+
+.figure__stage svg.method__svg--narrow {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.method__line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__head {
+  fill: var(--ink);
+}
+
+.method__op {
+  fill: var(--llm);
+  stroke: var(--frozen);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__join {
+  fill: var(--context);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__kv {
+  fill: url(#method-kv-hatch);
+  stroke: var(--kv-stroke);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__kv--swatch {
+  fill: var(--kv);
+}
+
+.method__hatch-ground {
+  fill: var(--kv);
+}
+
+.method__hatch-line {
+  stroke: var(--kv-hatch);
+}
+
+.method__boa {
+  fill: none;
+  stroke: var(--boa-model);
+}
+
+.method__snow {
+  fill: none;
+  stroke: var(--frozen);
+  stroke-linecap: round;
+}
+
+.method__snow-halo {
+  fill: none;
+  stroke: var(--paper);
+  stroke-linecap: round;
+}
+
+.method__flame {
+  fill: var(--flame);
+}
+
+.method__flame-core {
+  fill: var(--flame-core);
+}
+
+/* Formulas use the text face, as in the paper. */
+.method__math,
+.method__kl {
+  fill: var(--ink);
+  font-family: var(--font-text);
+  font-variant-numeric: normal;
+  font-synthesis: style;
+}
+
+.method__kl {
+  font-weight: 700;
+}
+
+.method__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+}
+
+.method__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.method__swatch {
+  flex: none;
+  overflow: visible;
+}
+
+.method__steps {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.method__step + .method__step {
+  margin-top: var(--space-3);
+}
+
+/* Scroll assembly: the diagram stays in view while the steps scroll past in normal flow.
+   Without it (reduced motion, no GSAP) the list above is all there is. */
+.method--assembling .method__steps {
+  padding: 0;
+  list-style: none;
+  counter-reset: method-step;
+}
+
+.method--assembling .method__step {
+  counter-increment: method-step;
+  display: flex;
+  align-items: center;
+  min-height: 55vh;
+}
+
+.method--assembling .method__step + .method__step {
+  margin-top: 0;
+}
+
+.method__step-button {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--duration) var(--ease);
+}
+
+.method__step-button::before {
+  content: counter(method-step);
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  transition: background-color var(--duration) var(--ease), border-color var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+
+.method__step-button:hover {
+  color: var(--ink);
+}
+
+.method__step.is-active .method__step-button {
+  color: var(--ink);
+}
+
+.method__step.is-active .method__step-button::before {
+  border-color: var(--boa-ink);
+  background: var(--boa-ink);
+  color: var(--paper);
+}
+
+@media (min-width: 56em) {
+  .method--assembling .method__visual {
+    position: sticky;
+    top: var(--space-6);
+  }
+
+  .method--assembling .figure__stage svg.method__svg {
+    max-height: calc(100vh - 10rem);
+  }
+
+  /* Room after the last caption, so the diagram is still whole in view when step 5 is active. */
+  .method--assembling .method__steps {
+    padding-bottom: 20vh;
+  }
+}
+
+/* On a phone the diagram alone sticks to the top; the legend scrolls away with the page, and
+   the captions pass underneath the diagram in the space left below it. */
+@media (max-width: 55.99em) {
+  .method--assembling .method__visual {
+    display: contents;
+  }
+
+  .method--assembling .figure__stage {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-block: var(--space-3);
+    background: var(--paper);
+    box-shadow: 0 1px 0 var(--rule);
+  }
+
+  .method--assembling .figure__stage svg.method__svg {
+    max-height: 55vh;
+  }
+
+  /* Keyboard focus scrolls a step button into view below the sticky diagram, not under it. */
+  .method--assembling .method__step-button {
+    scroll-margin-top: calc(var(--method-sticky, 0px) + var(--space-3));
+  }
+
+  .method--assembling .method__step {
+    min-height: 30vh;
+  }
+}
+
+/* Results */
+.results__chart-host--narrow {
+  max-width: 32rem;
+}
+
+.headlines {
+  display: grid;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.headlines[hidden] {
+  display: none;
+}
+
+@media (min-width: 56em) {
+  .headlines {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+.headline {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--rule);
+}
+
+.headline__value {
+  color: var(--boa-ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-3);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+.headline__text {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Read by screen readers instead of the animated number. */
+.headline__sr,
+.tabs ~ .table-scroll caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The race caption ends with its own paragraph saying how the lane times are measured. */
+[data-race-setting] {
+  display: block;
+  margin-top: var(--space-2);
+}
