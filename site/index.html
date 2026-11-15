@@ -86,9 +86,20 @@
         <h2 id="method-title">How Boa works</h2>
         <p>Boa has two trained parts, a <span class="nowrap">Mamba-2</span> encoder and a projection, and one frozen part, the target LLM, which is never modified. Rather than entering at the input, the soft tokens are projected into keys and values in the LLM’s attention cache at every layer.</p>
       </div>
-      <figure class="figure" id="figure-method">
-        <div class="figure__stage"></div>
-        <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+      <figure class="figure method" id="figure-method">
+        <div class="method__layout">
+          <div class="method__visual">
+            <div class="figure__stage"></div>
+            <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
+          </div>
+          <ol class="method__steps" aria-label="Steps of the method">
+            <li class="method__step"><span class="nowrap">Mamba-2</span> reads the context once, in linear time.</li>
+            <li class="method__step">A temporal stride keeps every <var>r</var>-th hidden state.</li>
+            <li class="method__step">Per-layer K and V projections turn them into a key-value cache.</li>
+            <li class="method__step">The frozen LLM attends to that cache instead of the text.</li>
+            <li class="method__step">Training matches its next-token distribution to the full-context teacher (KL).</li>
+          </ol>
+        </div>
         <figcaption>The encoder reads the context in one pass, every <var>r</var>-th hidden state is kept, and per-layer key and value projections turn those states into a KV cache for the frozen LLM. Training matches the next-token distribution of this student to that of the same LLM reading the full context.</figcaption>
       </figure>
     </section>

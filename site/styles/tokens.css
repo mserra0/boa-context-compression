@@ -36,6 +36,9 @@
   --student: #e6d1fb;      /* Method.svg: student generation tokens */
   --llm: #eaf5ff;          /* Method.svg: Transformer LLM block fill */
   --frozen: #0075e2;       /* Method.svg: projection outlines and snowflake */
+  --boa-model: #6f6f6f;    /* Method.svg: dashed outline of the trained Boa model */
+  --flame: #ec6f59;        /* Method(1).png: flame marking trained parts */
+  --flame-core: #fad15c;   /* Method(1).png: inner flame */
 
   /* Baselines, only inside comparison charts */
   --beacon-128: #e34948;   /* plots: Activation Beacon (w=128), solid */

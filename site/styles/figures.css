@@ -141,8 +141,13 @@
   stroke: var(--kv-stroke);
 }
 
-.token--answer {
+.token--answer,
+.token--teacher {
   fill: var(--teacher);
+}
+
+.token--student {
+  fill: var(--student);
 }
 
 .block {
@@ -524,4 +529,250 @@
 /* The narrow chart is drawn for phones; on wider screens it stops growing. */
 .cost__chart-host--narrow {
   max-width: 32rem;
+}
+
+/* Method: the diagram beside (wide) or above (narrow) the list of its steps. */
+.method__layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 56em) {
+  .method__layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--space-7);
+  }
+}
+
+.figure__stage svg.method__svg {
+  width: 100%;
+}
+
+.figure__stage svg.method__svg--narrow {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.method__line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__head {
+  fill: var(--ink);
+}
+
+.method__op {
+  fill: var(--llm);
+  stroke: var(--frozen);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__join {
+  fill: var(--context);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__kv {
+  fill: url(#method-kv-hatch);
+  stroke: var(--kv-stroke);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.method__kv--swatch {
+  fill: var(--kv);
+}
+
+.method__hatch-ground {
+  fill: var(--kv);
+}
+
+.method__hatch-line {
+  stroke: var(--kv-hatch);
+}
+
+.method__boa {
+  fill: none;
+  stroke: var(--boa-model);
+}
+
+.method__snow {
+  fill: none;
+  stroke: var(--frozen);
+  stroke-linecap: round;
+}
+
+.method__snow-halo {
+  fill: none;
+  stroke: var(--paper);
+  stroke-linecap: round;
+}
+
+.method__flame {
+  fill: var(--flame);
+}
+
+.method__flame-core {
+  fill: var(--flame-core);
+}
+
+/* Formulas use the text face, as in the paper. */
+.method__math,
+.method__kl {
+  fill: var(--ink);
+  font-family: var(--font-text);
+  font-variant-numeric: normal;
+  font-synthesis: style;
+}
+
+.method__kl {
+  font-weight: 700;
+}
+
+.method__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+}
+
+.method__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.method__swatch {
+  flex: none;
+  overflow: visible;
+}
+
+.method__steps {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.method__step + .method__step {
+  margin-top: var(--space-3);
+}
+
+/* Scroll assembly: the diagram stays in view while the steps scroll past in normal flow.
+   Without it (reduced motion, no GSAP) the list above is all there is. */
+.method--assembling .method__steps {
+  padding: 0;
+  list-style: none;
+  counter-reset: method-step;
+}
+
+.method--assembling .method__step {
+  counter-increment: method-step;
+  display: flex;
+  align-items: center;
+  min-height: 55vh;
+}
+
+.method--assembling .method__step + .method__step {
+  margin-top: 0;
+}
+
+.method__step-button {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--duration) var(--ease);
+}
+
+.method__step-button::before {
+  content: counter(method-step);
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  font-weight: 600;
+  font-variant-numeric: lining-nums;
+  transition: background-color var(--duration) var(--ease), border-color var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+
+.method__step-button:hover {
+  color: var(--ink);
+}
+
+.method__step.is-active .method__step-button {
+  color: var(--ink);
+}
+
+.method__step.is-active .method__step-button::before {
+  border-color: var(--boa-ink);
+  background: var(--boa-ink);
+  color: var(--paper);
+}
+
+@media (min-width: 56em) {
+  .method--assembling .method__visual {
+    position: sticky;
+    top: var(--space-6);
+  }
+
+  .method--assembling .figure__stage svg.method__svg {
+    max-height: calc(100vh - 10rem);
+  }
+
+  /* Room after the last caption, so the diagram is still whole in view when step 5 is active. */
+  .method--assembling .method__steps {
+    padding-bottom: 20vh;
+  }
+}
+
+/* On a phone the diagram alone sticks to the top; the legend scrolls away with the page, and
+   the captions pass underneath the diagram in the space left below it. */
+@media (max-width: 55.99em) {
+  .method--assembling .method__visual {
+    display: contents;
+  }
+
+  .method--assembling .figure__stage {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-block: var(--space-3);
+    background: var(--paper);
+    box-shadow: 0 1px 0 var(--rule);
+  }
+
+  .method--assembling .figure__stage svg.method__svg {
+    max-height: 55vh;
+  }
+
+  .method--assembling .method__step {
+    min-height: 30vh;
+  }
 }
