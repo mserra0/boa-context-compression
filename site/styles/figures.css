@@ -224,3 +224,304 @@
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
+
+/* Series colours, shared by the line chart, its legend and the cost bars. */
+.series--boa { --series: var(--boa); }
+.series--sac { --series: var(--sac); }
+.series--beacon128 { --series: var(--beacon-128); }
+.series--beacon2048 { --series: var(--beacon-2048); --series-dash: var(--beacon-2048-dash); }
+.series--full { --series: var(--full); --series-dash: var(--full-dash); }
+
+/* Line chart */
+.line-chart__svg {
+  width: 100%;
+}
+
+.line-chart__rule {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.line-chart__axis {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.line-chart__tick {
+  fill: var(--ink-muted);
+}
+
+.line-chart__title {
+  fill: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: normal;
+}
+
+.line-chart__line {
+  fill: none;
+  stroke: var(--series, var(--ink));
+  stroke-width: 1.75;
+  stroke-dasharray: var(--series-dash, none);
+  stroke-linejoin: round;
+}
+
+.is-emphasis .line-chart__line {
+  stroke-width: 3.5;
+}
+
+.line-chart__reveal {
+  fill: none;
+  stroke: #fff; /* mask luminance, not a colour on the page */
+  stroke-width: 14;
+}
+
+.line-chart__dot {
+  fill: var(--series, var(--ink));
+  stroke: var(--paper);
+  stroke-width: 1;
+}
+
+.line-chart__hit {
+  fill: transparent;
+}
+
+.line-chart__point {
+  cursor: pointer;
+  outline: none;
+}
+
+.line-chart__point:focus-visible .line-chart__dot,
+.line-chart__point:hover .line-chart__dot {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.line-chart__point:focus-visible .line-chart__hit {
+  fill: none;
+  stroke: var(--boa-ink);
+  stroke-width: 2;
+}
+
+.line-chart__marker-line {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.line-chart__ring {
+  fill: none;
+  stroke: var(--series, var(--ink));
+  stroke-width: 2;
+}
+
+.line-chart__marker-backing {
+  fill: var(--paper);
+}
+
+.line-chart__marker-x {
+  fill: var(--ink);
+  font-weight: 600;
+}
+
+.line-chart__marker-text {
+  fill: var(--ink);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.line-chart__tip {
+  pointer-events: none;
+}
+
+.line-chart__tip-box {
+  fill: var(--paper);
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+
+.line-chart__tip-text {
+  fill: var(--ink);
+}
+
+.line-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-3);
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+}
+
+.line-chart__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.line-chart__legend-item[hidden] {
+  display: none;
+}
+
+.line-chart__legend-item.is-emphasis {
+  font-weight: 600;
+}
+
+.line-chart__swatch {
+  flex: none;
+}
+
+/* Cost: controls, bars and the latency chart */
+.cost__controls {
+  gap: var(--space-4) var(--space-5);
+}
+
+/* The slider has the first row to itself; the decoder choice and the checkbox share the second. */
+.cost-slider {
+  flex: 1 1 100%;
+}
+
+.cost-slider > * {
+  max-width: 40rem;
+}
+
+.cost-slider__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.cost-slider__head label {
+  color: var(--ink-muted);
+}
+
+.cost-slider__value {
+  font-size: var(--step-0);
+  font-weight: 600;
+}
+
+/* Vertical swipes that start on the slider still scroll the page. */
+.cost-slider__input {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  accent-color: var(--boa-ink);
+  touch-action: pan-y;
+  cursor: pointer;
+}
+
+.cost-slider__ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+.cost__note {
+  margin-top: var(--space-3);
+  color: var(--ink-muted);
+}
+
+.cost__blocks {
+  display: grid;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+@media (min-width: 56em) {
+  .cost__blocks {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+.cost-block h3,
+.cost__chart h3 {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Two lines, so the bars below do not move when the sentence changes length. */
+.cost-block__lede {
+  min-height: 2.8em;
+  margin-top: var(--space-1);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+}
+
+.cost-block__lede[hidden],
+.cost-bars[hidden],
+.cost-bar[hidden],
+.cost-block__note[hidden] {
+  display: none;
+}
+
+.cost-bars {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.cost-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem var(--space-3);
+  align-items: baseline;
+}
+
+.cost-bar__value {
+  font-weight: 600;
+}
+
+.cost-bar.is-emphasis .cost-bar__label,
+.cost-bar.is-emphasis .cost-bar__value {
+  color: var(--boa-ink);
+  font-weight: 600;
+}
+
+.cost-bar__track {
+  grid-column: 1 / -1;
+  height: 0.625rem;
+  border-radius: 3px;
+  background: var(--paper-sunk);
+  overflow: hidden;
+}
+
+.cost-bar__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--series, var(--ink-muted));
+}
+
+.cost-block__note {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  color: var(--ink-muted);
+}
+
+.cost__chart {
+  margin-top: var(--space-7);
+}
+
+.cost__chart h3 + * {
+  margin-top: var(--space-3);
+}
+
+/* The narrow chart is drawn for phones; on wider screens it stops growing. */
+.cost__chart-host--narrow {
+  max-width: 32rem;
+}

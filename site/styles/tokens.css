@@ -43,6 +43,7 @@
   --sac: #4a3aa7;          /* plots: SAC */
   --full: #6b6a66;         /* plots: Full context, dashed */
   --full-dash: 6 4;
+  --beacon-2048-dash: 8 3 2 3; /* plots: Activation Beacon (w=2048), dash-dot */
 
   /* Page */
   --paper: #fdfdfb;
