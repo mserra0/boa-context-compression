@@ -1,6 +1,5 @@
 import { speedup } from "./latency.js";
 
-const SPEEDUP_TOKENS = 240000;
 const SPEEDUP_METHOD = "boa";
 const SPEEDUP_BASELINE = "beacon128";
 
@@ -14,14 +13,15 @@ export function headlines(results, latency) {
   const high = ratios.at(-1);
   const inDomain = results.inDomain.byRatio;
 
+  // The longest measured length, whatever the data holds.
+  const tokens = latency.lengths.at(-1);
   const speedups = [];
   for (const [id, decoder] of Object.entries(latency.decoders)) {
-    // While the latency data is read from a plot, the paper's own annotated factors are used,
-    // so the page never contradicts the figure it comes from.
+    // The paper's own factors win whenever the data carries them; the page labels them as reported.
     const annotated = latency.annotatedSpeedup?.[id];
-    const plotted = speedup(latency, { decoder: id, metric: "endToEndS", length: SPEEDUP_TOKENS, method: SPEEDUP_METHOD, baseline: SPEEDUP_BASELINE });
-    const factor = Number.isFinite(annotated) ? annotated : plotted === null ? null : Math.round(plotted);
-    if (factor !== null) speedups.push({ decoder: decoder.label, factor, tokens: SPEEDUP_TOKENS });
+    const measured = speedup(latency, { decoder: id, metric: "endToEndS", length: tokens, method: SPEEDUP_METHOD, baseline: SPEEDUP_BASELINE });
+    if (Number.isFinite(annotated)) speedups.push({ decoder: decoder.label, factor: annotated, tokens, reported: true });
+    else if (measured !== null) speedups.push({ decoder: decoder.label, factor: Math.round(measured), tokens, reported: false });
   }
 
   return {

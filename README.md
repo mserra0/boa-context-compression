@@ -4,7 +4,7 @@ Boa is a plug-and-play online context compressor built on a Mamba state-space mo
 
 Paper: [Linear-Time Context Compression with State-Space Encoding](https://arxiv.org/abs/2610.33006) (arXiv:2610.33006).
 
-Project page: <https://mserra0.github.io/boa-context-compression/>
+Project page: <https://mserra0.github.io/boa-context-compression/> (source in `site/`; the latency curves in `site/data/latency.json` are regenerated from the benchmark outputs with `node site/tools/build-latency.mjs <outputs-directory> > site/data/latency.json`)
 
 <p align="center">
   <img src="figures/Method.png" alt="Boa Compressor Overview" width="100%">

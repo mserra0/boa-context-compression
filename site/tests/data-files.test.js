@@ -30,12 +30,30 @@ test("every method id is present in every metric object", () => {
   }
 });
 
-test("latency sanity anchors at 240000 tokens", () => {
-  const at = (decoder) => speedup(latency, { decoder, metric: "endToEndS", length: 240000, method: "boa", baseline: "beacon128" });
-  assert.ok(at("qwen3-1.7b") >= 18 && at("qwen3-1.7b") <= 20);
-  assert.ok(at("qwen3-4b") >= 38 && at("qwen3-4b") <= 40);
-  const mem = measurement(latency, { decoder: "qwen3-1.7b", metric: "memoryGB", method: "full", length: 240000 });
-  assert.ok(mem >= 45 && mem <= 49);
+test("latency.json is measured data, not plot-read values", () => {
+  assert.notEqual(latency.approximate, true);
+  assert.equal(latency.lengths.at(-1), 245760);
+  assert.equal(latency.dtype, "bf16");
+  assert.equal(typeof latency.source, "string");
+});
+
+test("latency anchors at the longest measured length", () => {
+  const last = latency.lengths.at(-1);
+  const at = (decoder) => speedup(latency, { decoder, metric: "endToEndS", length: last, method: "boa", baseline: "beacon128" });
+  assert.ok(at("qwen3-1.7b") >= 20 && at("qwen3-1.7b") <= 21);
+  assert.ok(at("qwen3-4b") >= 37 && at("qwen3-4b") <= 38);
+  const mem = (decoder, method) => measurement(latency, { decoder, metric: "memoryGB", method, length: last });
+  assert.ok(mem("qwen3-1.7b", "full") >= 44 && mem("qwen3-1.7b", "full") <= 45);
+  assert.ok(mem("qwen3-4b", "full") >= 62 && mem("qwen3-4b", "full") <= 63);
+  assert.ok(mem("qwen3-4b", "boa") >= 27 && mem("qwen3-4b", "boa") <= 28);
+});
+
+test("both decoders have complete memory and context-processing data", () => {
+  for (const decoder of Object.values(latency.decoders)) {
+    for (const metric of ["contextS", "memoryGB"]) {
+      for (const { id } of latency.methods) assert.equal(decoder[metric]?.[id]?.length, latency.lengths.length, `${decoder.label} ${metric}.${id}`);
+    }
+  }
 });
 
 test("results.json holds the paper reference values", () => {
@@ -64,7 +82,7 @@ test("loadData rejects with DataLoadError carrying the url", async () => {
   }
 });
 
-test("latency.json holds the speedups annotated in the paper's figure", () => {
+test("latency.json holds the speedups the paper reports", () => {
   assert.deepEqual(latency.annotatedSpeedup, { "qwen3-1.7b": 19, "qwen3-4b": 39 });
   for (const id of Object.keys(latency.annotatedSpeedup)) assert.ok(id in latency.decoders, id);
 });
