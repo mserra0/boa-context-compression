@@ -138,12 +138,13 @@ export function mount(root, data) {
     ...MAIN_METHODS.map((id) => latency.methods.find((m) => m.id === id)),
     ...latency.methods.filter((m) => !MAIN_METHODS.includes(m.id)),
   ];
-  const state = {index: Math.min(INITIAL_INDEX, lengths.length - 1), decoder: decoderIds[0], showOthers: false};
+  const state = {index: Math.min(INITIAL_INDEX, lengths.length - 1), decoder: decoderIds[0], showOthers: true};
 
   const length = slider(lengths);
   length.input.value = state.index;
   const decoders = decoderGroup(latency, state.decoder);
   const others = node("input", {type: "checkbox"});
+  others.checked = state.showOthers;
   const controls = node("div", {class: "figure__controls cost__controls"}, [
     length.root,
     decoders,
