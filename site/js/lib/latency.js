@@ -11,3 +11,10 @@ export function speedup(data, { decoder, metric, length, method, baseline }) {
   if (base === null || value === null || value === 0) return null;
   return base / value;
 }
+
+// Labels of the decoders that report `metric` for at least one of `methods`, at any length.
+export function labelsWithMetric(data, metric, methods) {
+  return Object.entries(data.decoders)
+    .filter(([id]) => data.lengths.some((length) => methods.some((method) => measurement(data, { decoder: id, metric, method, length }) !== null)))
+    .map(([, decoder]) => decoder.label);
+}

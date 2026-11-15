@@ -30,8 +30,7 @@ test("every method id is present in every metric object", () => {
   }
 });
 
-test("latency.json is measured data, not plot-read values", () => {
-  assert.notEqual(latency.approximate, true);
+test("latency.json states its configuration and longest length", () => {
   assert.equal(latency.lengths.at(-1), 245760);
   assert.equal(latency.dtype, "bf16");
   assert.equal(typeof latency.source, "string");
@@ -41,19 +40,27 @@ test("latency anchors at the longest measured length", () => {
   const last = latency.lengths.at(-1);
   const at = (decoder) => speedup(latency, { decoder, metric: "endToEndS", length: last, method: "boa", baseline: "beacon128" });
   assert.ok(at("qwen3-1.7b") >= 20 && at("qwen3-1.7b") <= 21);
-  assert.ok(at("qwen3-4b") >= 37 && at("qwen3-4b") <= 38);
+  assert.equal(Math.round(at("qwen3-4b")), 39);
   const mem = (decoder, method) => measurement(latency, { decoder, metric: "memoryGB", method, length: last });
   assert.ok(mem("qwen3-1.7b", "full") >= 44 && mem("qwen3-1.7b", "full") <= 45);
-  assert.ok(mem("qwen3-4b", "full") >= 62 && mem("qwen3-4b", "full") <= 63);
-  assert.ok(mem("qwen3-4b", "boa") >= 27 && mem("qwen3-4b", "boa") <= 28);
+  assert.equal(mem("qwen3-4b", "full"), null);
 });
 
-test("both decoders have complete memory and context-processing data", () => {
-  for (const decoder of Object.values(latency.decoders)) {
-    for (const metric of ["contextS", "memoryGB"]) {
-      for (const { id } of latency.methods) assert.equal(decoder[metric]?.[id]?.length, latency.lengths.length, `${decoder.label} ${metric}.${id}`);
-    }
+test("Qwen3-1.7B has complete memory and context-processing data, Qwen3-4B only end-to-end latency", () => {
+  for (const metric of ["contextS", "memoryGB"]) {
+    for (const { id } of latency.methods) assert.equal(latency.decoders["qwen3-1.7b"][metric]?.[id]?.length, latency.lengths.length, `${metric}.${id}`);
+    assert.equal(latency.decoders["qwen3-4b"][metric], undefined, metric);
   }
+});
+
+test("the Qwen3-4B latency series is the committed data file, to three significant figures", () => {
+  const published = JSON.parse(readFileSync(new URL("../tools/paper-qwen3-4b.json", import.meta.url), "utf8"));
+  assert.deepEqual(latency.decoders["qwen3-4b"].endToEndS, published.endToEndS);
+  for (const { id } of latency.methods) {
+    assert.equal(published.endToEndS[id].length, latency.lengths.length, id);
+    for (const v of published.endToEndS[id]) assert.equal(Number(v.toPrecision(3)), v, `${id} ${v}`);
+  }
+  assert.deepEqual(Object.keys(published), ["endToEndS"]);
 });
 
 test("results.json holds the paper reference values", () => {

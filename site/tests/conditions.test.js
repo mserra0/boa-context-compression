@@ -4,7 +4,7 @@ import { conditionsText } from "../js/lib/conditions.js";
 
 const latency = {
   ratio: 8, generatedTokens: 64, dtype: "bf16",
-  decoders: { a: { label: "A", gpu: "GPU X" }, b: { label: "B", note: "A later run." }, c: { label: "C" } },
+  decoders: { a: { label: "A", gpu: "GPU X" }, b: { label: "B", note: "Decoder note." }, c: { label: "C" } },
 };
 
 test("conditions come from the data, GPU included when stated", () => {
@@ -12,7 +12,7 @@ test("conditions come from the data, GPU included when stated", () => {
 });
 
 test("an unstated GPU is left out and the decoder note follows", () => {
-  assert.equal(conditionsText(latency, "b"), "Measured at 8× compression, 64 generated tokens, bf16. A later run.");
+  assert.equal(conditionsText(latency, "b"), "Measured at 8× compression, 64 generated tokens, bf16. Decoder note.");
 });
 
 test("missing fields degrade to what is known", () => {

@@ -2,7 +2,8 @@
 //
 //   node site/tools/build-latency.mjs /path/to/resources_boa_ssm/outputs > site/data/latency.json
 //
-// The argument is the directory that holds results_sota.jsonl, qwen3_1-7b/ and qwen3_4b/.
+// The argument is the directory that holds results_sota.jsonl and qwen3_1-7b/.
+// The Qwen3-4B end-to-end series comes from tools/paper-qwen3-4b.json.
 // Only derived numbers are written; the raw benchmark files are never copied into the repository.
 // This script is not run in CI.
 //
@@ -15,7 +16,8 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const SIGNIFICANT = 4;
-const round = (x) => Number(x.toPrecision(SIGNIFICANT));
+const round = (x, digits = SIGNIFICANT) => Number(x.toPrecision(digits));
+const PUBLISHED_DIGITS = 3;
 
 export function rowsToMetrics(rows, adapter, lengths) {
   const metrics = { endToEndS: [], contextS: [], memoryGB: [] };
@@ -40,6 +42,12 @@ export function buildLatency(config, readRows) {
     const entry = { label: decoder.label };
     if (decoder.gpu) entry.gpu = decoder.gpu;
     if (decoder.note) entry.note = decoder.note;
+    if (decoder.series) {
+      entry.endToEndS = {};
+      for (const { id } of methods) entry.endToEndS[id] = decoder.series.endToEndS[id].map((v) => round(v, PUBLISHED_DIGITS));
+      out.decoders[decoder.id] = entry;
+      continue;
+    }
     entry.endToEndS = {};
     entry.contextS = {};
     entry.memoryGB = {};
@@ -57,8 +65,7 @@ export function buildLatency(config, readRows) {
 
 const SOTA_17 = "results_sota.jsonl";
 const BEACON2048_17 = "qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl";
-const SOTA_4 = "qwen3_4b/results_sota_4b_beacon_w128.jsonl";
-const BEACON2048_4 = "qwen3_4b/results_beacon_4b_w2048.jsonl";
+const QWEN3_4B = JSON.parse(readFileSync(new URL("./paper-qwen3-4b.json", import.meta.url), "utf8"));
 const sources = (sota, beacon2048) => ({
   boa: { file: sota, adapter: "ssm_kv" },
   sac: { file: sota, adapter: "sac" },
@@ -74,9 +81,9 @@ export const CONFIG = {
   generatedTokens: 64,
   dtype: "bf16",
   source: [
-    "Derived from the paper's benchmark outputs, median of 3 timed runs after 1 warmup, 8x compression, 64 generated tokens, bf16.",
-    "Qwen3-1.7B: results_sota.jsonl (Boa, SAC, Activation Beacon w=128, full context) and qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl (Beacon w=2048), on an NVIDIA RTX PRO 6000 (Blackwell) as stated in the paper's supplementary material.",
-    "Qwen3-4B: qwen3_4b/results_sota_4b_beacon_w128.jsonl and qwen3_4b/results_beacon_4b_w2048.jsonl.",
+    "8x compression, 64 generated tokens, bf16.",
+    "Qwen3-1.7B: derived from the paper's benchmark outputs, median of 3 timed runs after 1 warmup; results_sota.jsonl (Boa, SAC, Activation Beacon w=128, full context) and qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl (Beacon w=2048), on an NVIDIA RTX PRO 6000 (Blackwell) as stated in the paper's supplementary material.",
+    "Qwen3-4B: values as published in the paper.",
     "End to end = t_total_ms; context processing = t_compress_ms + t_ttft_ms; memory = peak_mem_mb / 1024.",
     "The last length is 245,760 tokens (the paper calls it 240k).",
   ].join(" "),
@@ -90,11 +97,7 @@ export const CONFIG = {
   ],
   decoders: [
     { id: "qwen3-1.7b", label: "Qwen3-1.7B", gpu: "NVIDIA RTX PRO 6000 (Blackwell)", sources: sources(SOTA_17, BEACON2048_17) },
-    {
-      id: "qwen3-4b",
-      label: "Qwen3-4B",
-      sources: sources(SOTA_4, BEACON2048_4),
-    },
+    { id: "qwen3-4b", label: "Qwen3-4B", series: QWEN3_4B },
   ],
 };
 

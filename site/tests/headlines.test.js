@@ -30,7 +30,7 @@ test("speedups are computed from the data when the paper reports none", () => {
   const plain = { ...latency };
   delete plain.annotatedSpeedup;
   const h = headlines(results, plain);
-  assert.deepEqual(h.speedups.map((s) => [s.factor, s.reported]), [[21, false], [37, false]]);
+  assert.deepEqual(h.speedups.map((s) => [s.factor, s.reported]), [[21, false], [39, false]]);
 });
 
 test("the headline length comes from the data, not a constant", () => {
