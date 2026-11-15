@@ -2,9 +2,38 @@
 
 Boa is a plug-and-play online context compressor built on a Mamba state-space model (SSM). It encodes arbitrary-length text context in a single linear-time $\mathcal{O}(L)$ pass into a compact sequence of continuous representations or Key-Value (KV) caches, conditioning a frozen target LLM without fine-tuning or modifying the LLM.
 
-Paper: [Linear-Time Context Compression with State-Space Encoding](https://arxiv.org/abs/2610.33006) (arXiv:2610.33006).
+<p align="center">
+  <a href="https://arxiv.org/abs/2610.33006">
+    <img src="https://img.shields.io/badge/arXiv-2610.33006-B31B1B?style=for-the-badge&logo=arxiv&logoColor=white" alt="Paper on arXiv: 2610.33006">
+  </a>
+  <a href="https://www.alphaxiv.org/abs/2610.33006">
+    <img src="https://img.shields.io/badge/alphaXiv-Discussion-9A2036?style=for-the-badge&logo=alphaxiv&logoColor=white" alt="Discussion on alphaXiv">
+  </a>
+  <a href="https://mserra0.github.io/boa-context-compression/">
+    <img src="https://img.shields.io/badge/Project%20Page-Live-1F6FEB?style=for-the-badge&logo=githubpages&logoColor=white" alt="Project page">
+  </a>
+</p>
 
-Project page: <https://mserra0.github.io/boa-context-compression/> (source in `site/`; the latency curves in `site/data/latency.json` are regenerated from the benchmark outputs with `node site/tools/build-latency.mjs <outputs-directory> > site/data/latency.json`)
+<p align="center">
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3.11%2B-18181B?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
+  </a>
+  <a href="https://github.com/astral-sh/uv">
+    <img src="https://img.shields.io/badge/Managed%20by-uv-18181B?style=flat-square&logo=uv&logoColor=white" alt="Managed by uv">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-18181B?style=flat-square" alt="License: MIT">
+  </a>
+  <a href="#quick-start">
+    <img src="https://img.shields.io/badge/Quick%20Start-18181B?style=flat-square" alt="Quick Start">
+  </a>
+  <a href="#documentation">
+    <img src="https://img.shields.io/badge/Documentation-18181B?style=flat-square" alt="Documentation">
+  </a>
+  <a href="#citation">
+    <img src="https://img.shields.io/badge/Citation-18181B?style=flat-square" alt="Citation">
+  </a>
+</p>
 
 <p align="center">
   <img src="figures/Method.png" alt="Boa Compressor Overview" width="100%">
@@ -96,6 +125,10 @@ Evaluation and benchmarks:
 - [MRQA Evaluation Suite](docs/evaluation/mrqa-metrics.md): official span-overlap F1/EM package and batch scripts
 - [Ablation Benchmark Matrix](docs/benchmarks/ablations.md): 8x compression, model scaling and ablation runs
 - [Latency Benchmark](docs/benchmarks/latency.md): latency / memory sweeps against ICAE, SAC, Activation Beacon and full context (`benchmarks/latency/`)
+
+Project page:
+
+- [Project page](https://mserra0.github.io/boa-context-compression/): source in `site/`; the latency curves in `site/data/latency.json` are regenerated with `node site/tools/build-latency.mjs <outputs-directory> > site/data/latency.json`
 
 Engineering notes:
 
