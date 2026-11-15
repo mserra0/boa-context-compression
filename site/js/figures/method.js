@@ -466,7 +466,12 @@ export function mount(root) {
     const line = activationLine();
     return items.map((item) => window.scrollY + item.getBoundingClientRect().top - line);
   };
+  // Narrow layout: the diagram sticks to the top, so a focused step button must scroll to below it.
+  const syncStickyHeight = () => {
+    root.style.setProperty("--method-sticky", wide.matches ? "0px" : `${Math.ceil(stage.getBoundingClientRect().height)}px`);
+  };
   const update = () => {
+    syncStickyHeight();
     const next = stepAt(stepStarts(), window.scrollY);
     if (next === active) return;
     moveStep(gsap, scene, active, next);

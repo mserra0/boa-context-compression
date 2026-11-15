@@ -1,6 +1,7 @@
 import { el } from "../lib/svg.js";
 import { prefersReducedMotion } from "../lib/motion.js";
 import { compressedLength, keptIndices } from "../lib/compression.js";
+import { ordinal } from "../lib/format.js";
 import { rowWidth, tokenLeft, tokenRow } from "./tokens.js";
 
 // Diagram parameters, not measurements.
@@ -22,7 +23,7 @@ function readout(ratio) {
 }
 
 function describe(ratio) {
-  return `Of ${CONTEXT_TOKENS} context tokens, every ${ratio}th, counting back from the last, is kept: ${compressedLength(CONTEXT_TOKENS, ratio)} soft tokens.`;
+  return `Of ${CONTEXT_TOKENS} context tokens, every ${ordinal(ratio)}, counting back from the last, is kept: ${compressedLength(CONTEXT_TOKENS, ratio)} soft tokens.`;
 }
 
 function buildScene(layout) {

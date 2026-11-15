@@ -159,7 +159,17 @@ async function start() {
     return;
   }
 
-  renderResults(data.results);
+  // A throw while filling the results tables must not stop the figures from mounting.
+  try {
+    renderResults(data.results);
+  } catch (error) {
+    console.error("Results tables failed to render", error);
+    const status = document.querySelector("[data-results-status]");
+    if (status) {
+      status.textContent = "The results tables could not be shown. Try reloading the page.";
+      status.hidden = false;
+    }
+  }
   mountFigures(FIGURE_MODULES, data, {
     getRoot: (id) => document.getElementById(id),
     onError: (id, error) => {
