@@ -10,8 +10,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -28,10 +26,16 @@ jobs:
       - name: Run tests
         working-directory: site
         run: node --test
+      - name: Refuse approximate latency data
+        working-directory: site
+        run: node -e "const d = JSON.parse(require('fs').readFileSync('data/latency.json', 'utf8')); if (d.approximate === true) { console.error('latency.json is flagged approximate'); process.exit(1); }"
 
   deploy:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
