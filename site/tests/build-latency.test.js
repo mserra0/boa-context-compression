@@ -39,15 +39,6 @@ test("buildLatency assembles decoders from the configured files", () => {
   assert.deepEqual(out.decoders.d.endToEndS, { boa: [1], full: [2] });
   assert.deepEqual(out.decoders.d.memoryGB, { boa: [2], full: [2] });
   assert.equal(out.decoders.d.gpu, "GPU");
+  assert.equal(out.approximate, undefined);
   assert.equal(out.source, "note");
-});
-
-test("buildLatency takes a decoder's end-to-end series as given, to three significant figures, with no other metric", () => {
-  const out = buildLatency({
-    lengths: [1, 2],
-    methods: [{ id: "boa", label: "Boa" }, { id: "full", label: "Full context" }],
-    decoders: [{ id: "d", label: "D", series: { endToEndS: { boa: [1.234, 2.5], full: [3, 4.5678] } } }],
-    ratio: 8, generatedTokens: 64, dtype: "bf16", source: "note",
-  }, () => { throw new Error("no file should be read"); });
-  assert.deepEqual(out.decoders.d, { label: "D", endToEndS: { boa: [1.23, 2.5], full: [3, 4.57] } });
 });

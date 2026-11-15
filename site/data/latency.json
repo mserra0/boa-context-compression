@@ -6,7 +6,7 @@
  "ratio": 8,
  "generatedTokens": 64,
  "dtype": "bf16",
- "source": "8x compression, 64 generated tokens, bf16. Qwen3-1.7B: derived from the paper's benchmark outputs, median of 3 timed runs after 1 warmup; results_sota.jsonl (Boa, SAC, Activation Beacon w=128, full context) and qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl (Beacon w=2048), on an NVIDIA RTX PRO 6000 (Blackwell) as stated in the paper's supplementary material. Qwen3-4B: values as published in the paper. End to end = t_total_ms; context processing = t_compress_ms + t_ttft_ms; memory = peak_mem_mb / 1024. The last length is 245,760 tokens (the paper calls it 240k).",
+ "source": "Derived from the paper's benchmark outputs, median of 3 timed runs after 1 warmup, 8x compression, 64 generated tokens, bf16. Qwen3-1.7B: results_sota.jsonl (Boa, SAC, Activation Beacon w=128, full context) and qwen3_1-7b/results_sota_1-7b_beacon_w2048.jsonl (Beacon w=2048), on an NVIDIA RTX PRO 6000 (Blackwell) as stated in the paper's supplementary material. Qwen3-4B: qwen3_4b/results_sota_4b_beacon_w128.jsonl and qwen3_4b/results_beacon_4b_w2048.jsonl. End to end = t_total_ms; context processing = t_compress_ms + t_ttft_ms; memory = peak_mem_mb / 1024. The last length is 245,760 tokens (the paper calls it 240k).",
  "lengths": [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 245760],
  "methods": [
   {
@@ -59,11 +59,25 @@
   "qwen3-4b": {
    "label": "Qwen3-4B",
    "endToEndS": {
-    "boa": [1.5, 1.52, 1.5, 1.5, 1.56, 1.68, 1.96, 2.48, 3.61, 5.73],
-    "sac": [1.46, 1.53, 1.6, 1.67, 1.94, 2.47, 3.5, 5.56, 9.76, 17.2],
-    "beacon128": [2.23, 2.53, 2.86, 3.59, 4.97, 7.79, 13.5, 27.6, 75.9, 225],
-    "beacon2048": [2.26, 2.29, 2.46, 2.76, 3.37, 4.78, 8.5, 19.4, 54.2, 159],
-    "full": [1.47, 1.51, 1.56, 1.61, 1.83, 2.43, 4.12, 9.76, 28.6, 85]
+    "boa": [1.488, 1.493, 1.502, 1.528, 1.577, 1.746, 2.144, 2.864, 4.421, 7.17],
+    "sac": [1.467, 1.493, 1.567, 1.721, 2.003, 2.606, 3.817, 6.23, 11.03, 19.54],
+    "beacon128": [2.362, 2.539, 2.907, 3.565, 4.941, 7.725, 13.69, 30.16, 88.83, 266.2],
+    "beacon2048": [2.263, 2.314, 2.517, 2.806, 3.48, 5.026, 9.235, 20.39, 57.01, 168.6],
+    "full": [1.454, 1.488, 1.527, 1.62, 1.901, 2.635, 4.705, 11.36, 33.67, 98.68]
+   },
+   "contextS": {
+    "boa": [0.0715, 0.07071, 0.07104, 0.09333, 0.1805, 0.368, 0.774, 1.488, 3.249, 5.736],
+    "sac": [0.06075, 0.09975, 0.1743, 0.3249, 0.6224, 1.212, 2.427, 4.842, 9.64, 18.13],
+    "beacon128": [0.1701, 0.3443, 0.6968, 1.376, 2.765, 5.553, 11.25, 27.81, 84.38, 259.4],
+    "beacon2048": [0.04692, 0.1027, 0.292, 0.5967, 1.26, 2.799, 6.763, 17.8, 53.97, 160.3],
+    "full": [0.02939, 0.05008, 0.1027, 0.2167, 0.4936, 1.238, 3.272, 9.381, 30.27, 93.41]
+   },
+   "memoryGB": {
+    "boa": [10.42, 10.46, 10.53, 10.67, 10.96, 11.54, 12.69, 14.99, 19.59, 27.65],
+    "sac": [15.33, 15.55, 15.58, 15.65, 15.79, 16.15, 16.99, 18.68, 22.05, 27.96],
+    "beacon128": [8.86, 8.869, 8.886, 8.922, 9.067, 9.345, 9.907, 11.03, 13.41, 17.6],
+    "beacon2048": [9.318, 10, 11.44, 12.56, 12.87, 13.73, 15.46, 18.92, 25.82, 37.92],
+    "full": [10.5, 10.63, 10.82, 11.25, 12.11, 13.85, 17.31, 24.23, 38.07, 62.31]
    }
   }
  }

@@ -1,6 +1,6 @@
 import { onVisible, prefersReducedMotion } from "../lib/motion.js";
 import { linearScale, logScale } from "../lib/scales.js";
-import { labelsWithMetric, measurement, speedup } from "../lib/latency.js";
+import { measurement, speedup } from "../lib/latency.js";
 import { formatGigabytes, formatSeconds, formatTokens } from "../lib/format.js";
 import { conditionsText } from "../lib/conditions.js";
 import { speedSentence } from "../lib/speed.js";
@@ -24,7 +24,7 @@ const BLOCKS = [
     metric: "endToEndS", title: "Time to answer", subject: "Time to answer", format: formatSeconds, scale: "log",
   },
   {
-    metric: "memoryGB", title: "Peak GPU memory", subject: "Peak GPU memory", format: formatGigabytes, scale: "linear",
+    metric: "memoryGB", title: "Peak GPU memory", subject: "Peak memory", format: formatGigabytes, scale: "linear",
     lede: "The most GPU memory in use at any point while answering.",
   },
 ];
@@ -63,10 +63,12 @@ function barScale(latency, decoder, metric, kind) {
   return linearScale([0, max], [0, 100]);
 }
 
-// "Peak GPU memory is reported for Qwen3-1.7B.", from whichever decoders have the metric.
+// "Peak memory was measured with Qwen3-1.7B only.", from whichever decoders have the metric.
 function unmeasuredNote(latency, metric, subject) {
-  const reported = labelsWithMetric(latency, metric, MAIN_METHODS);
-  return reported.length ? [`${subject} is reported for `, ...listJoin(reported), "."] : [`${subject} is not reported.`];
+  const measured = Object.entries(latency.decoders)
+    .filter(([id]) => latency.lengths.some((length) => MAIN_METHODS.some((method) => measurement(latency, {decoder: id, metric, method, length}) !== null)))
+    .map(([, decoder]) => decoder.label);
+  return measured.length ? [`${subject} was measured with `, ...listJoin(measured), " only."] : [`${subject} was not measured.`];
 }
 
 function slider(lengths) {
