@@ -58,7 +58,7 @@
   },
   "qwen3-4b": {
    "label": "Qwen3-4B",
-   "note": "These curves come from a later benchmark run than the paper's figure, so the values differ slightly from the published plot.",
+   "note": "These curves come from a later benchmark run than the paper's figure, so the values differ from the published plot by up to about 18%.",
    "endToEndS": {
     "boa": [1.488, 1.493, 1.502, 1.528, 1.577, 1.746, 2.144, 2.864, 4.421, 7.17],
     "sac": [1.467, 1.493, 1.567, 1.721, 2.003, 2.606, 3.817, 6.23, 11.03, 19.54],

@@ -95,7 +95,7 @@ export const CONFIG = {
     {
       id: "qwen3-4b",
       label: "Qwen3-4B",
-      note: "These curves come from a later benchmark run than the paper's figure, so the values differ slightly from the published plot.",
+      note: "These curves come from a later benchmark run than the paper's figure, so the values differ from the published plot by up to about 18%.",
       sources: sources(SOTA_4, BEACON2048_4),
     },
   ],
