@@ -1,5 +1,6 @@
 {
   "approximate": true,
+  "annotatedSpeedup": {"qwen3-1.7b": 19, "qwen3-4b": 39},
   "ratio": 8,
   "generatedTokens": 64,
   "lengths": [512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 240000],

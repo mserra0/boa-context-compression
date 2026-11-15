@@ -63,3 +63,8 @@ test("loadData rejects with DataLoadError carrying the url", async () => {
     globalThis.fetch = original;
   }
 });
+
+test("latency.json holds the speedups annotated in the paper's figure", () => {
+  assert.deepEqual(latency.annotatedSpeedup, { "qwen3-1.7b": 19, "qwen3-4b": 39 });
+  for (const id of Object.keys(latency.annotatedSpeedup)) assert.ok(id in latency.decoders, id);
+});

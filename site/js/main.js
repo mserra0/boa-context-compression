@@ -4,6 +4,8 @@ import { mount as mountRace } from "./figures/race.js";
 import { mount as mountRatio } from "./figures/ratio.js";
 import { mount as mountCost } from "./figures/cost.js";
 import { mount as mountMethod } from "./figures/method.js";
+import { mount as mountResults } from "./figures/results.js";
+import { enhanceTabs } from "./tabs.js";
 
 // Figure modules register here as {id, mount}, where id is the <figure> id in index.html.
 const FIGURE_MODULES = [
@@ -11,6 +13,7 @@ const FIGURE_MODULES = [
   {id: "figure-ratio", mount: mountRatio},
   {id: "figure-cost", mount: mountCost},
   {id: "figure-method", mount: mountMethod},
+  {id: "figure-results", mount: mountResults},
 ];
 
 const LOAD_FAILED = "The data for this figure could not be loaded. Try reloading the page.";
@@ -102,6 +105,9 @@ function renderResults(results) {
   const outOfDomain = document.getElementById("table-out-of-domain");
   if (inDomain) renderResultsTable(inDomain, results, results.inDomain);
   if (outOfDomain) renderResultsTable(outOfDomain, results, results.outOfDomain);
+  // Both tables stay visible one after the other when this script does not run.
+  const panels = [...document.querySelectorAll("[data-results-panel]")];
+  enhanceTabs(panels, {label: "Results split", labels: ["In domain", "Out of domain"]});
 }
 
 function selectContents(node) {

@@ -240,3 +240,38 @@ pre {
 .nowrap {
   white-space: nowrap;
 }
+
+/* Tabs: a row of native buttons over a panel. */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-top: var(--space-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+.tab {
+  min-height: 2.75rem;
+  margin-bottom: -1px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab[aria-selected="true"] {
+  border-bottom-color: var(--boa);
+  color: var(--ink);
+}
+
+.column > .tabs + .table-scroll {
+  margin-top: var(--space-4);
+}

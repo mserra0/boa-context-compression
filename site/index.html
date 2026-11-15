@@ -109,22 +109,25 @@
         <h2 id="results-title">Results</h2>
         <p>On the in-domain MRQA question-answering datasets, Boa scores above Activation Beacon and SAC at every compression ratio tested, and loses little as the ratio grows. Out of domain the three methods are much closer, and which one leads depends on the ratio.</p>
       </div>
+      <div class="figure">
+        <ul class="headlines" data-headlines hidden aria-label="Headline numbers"></ul>
+      </div>
       <figure class="figure" id="figure-results">
         <div class="figure__stage"></div>
         <p class="figure__fallback">This figure needs the page to be served over HTTP.</p>
-        <figcaption>Scores are normalised between the LLM without any context and the same LLM reading the full context.</figcaption>
+        <figcaption>Normalised F1 on the in-domain MRQA datasets: 0 is the LLM without any context and 100 is the same LLM reading the full context. Hover, focus or tap a point to read its value.</figcaption>
       </figure>
       <div class="column results-tables">
         <h3>Average exact match and F1</h3>
         <p class="table-note">Averages over the datasets in each split, with a frozen <span data-results-decoder>Qwen3</span> decoder. The best compressed score in each column is in bold.</p>
         <noscript><p class="table-note">The table values are filled in by JavaScript. They are also in the results tables of the paper.</p></noscript>
         <p class="table-note table-note--error" data-results-status hidden></p>
-        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-in-domain-caption">
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-in-domain-caption" data-results-panel>
           <table class="data-table" id="table-in-domain">
             <caption id="table-in-domain-caption">In domain</caption>
           </table>
         </div>
-        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-out-of-domain-caption">
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="table-out-of-domain-caption" data-results-panel>
           <table class="data-table" id="table-out-of-domain">
             <caption id="table-out-of-domain-caption">Out of domain</caption>
           </table>
