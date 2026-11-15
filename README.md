@@ -15,15 +15,6 @@ Boa is a plug-and-play online context compressor built on a Mamba state-space mo
 </p>
 
 <p align="center">
-  <a href="https://www.python.org/">
-    <img src="https://img.shields.io/badge/Python-3.11%2B-18181B?style=flat-square&logo=python&logoColor=white" alt="Python 3.11+">
-  </a>
-  <a href="https://github.com/astral-sh/uv">
-    <img src="https://img.shields.io/badge/Managed%20by-uv-18181B?style=flat-square&logo=uv&logoColor=white" alt="Managed by uv">
-  </a>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-18181B?style=flat-square" alt="License: MIT">
-  </a>
   <a href="#quick-start">
     <img src="https://img.shields.io/badge/Quick%20Start-18181B?style=flat-square" alt="Quick Start">
   </a>
